@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="Proxy Policy Tuning: Inference-Time Adaptation of Robotic Foundation Models.">
+  <meta name="keywords" content="Proxy Policy Tuning, PPT, VLA, robotic foundation models, flow matching, policy steering">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Proxy Policy Tuning</title>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="icon" href="./static/images/favicon.svg">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script src="./static/js/index.js"></script>
+</head>
+<body>
+
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title">
+            Proxy Policy Tuning
+          </h1>
+          <h2 class="subtitle is-3 publication-title">
+            Inference-Time Adaptation of Robotic Foundation Models
+          </h2>
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">
+              Anonymous Authors
+            </span>
+          </div>
+
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">Submitted to CoRL 2026 — under double-blind review</span>
+          </div>
+
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <!-- PDF Link. -->
+              <span class="link-block">
+                <a href="#" class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fas fa-file-pdf"></i>
+                  </span>
+                  <span>Paper</span>
+                </a>
+              </span>
+              <!-- Code Link. -->
+              <span class="link-block">
+                <a href="#" class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fab fa-github"></i>
+                  </span>
+                  <span>Code (coming soon)</span>
+                </a>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="hero teaser">
+  <div class="container is-max-desktop">
+    <div class="hero-body">
+      <img src="./static/images/teaser.png" alt="PPT teaser figure"
+           style="width: 100%; max-width: 100%;">
+      <h2 class="subtitle has-text-centered">
+        <span class="ppt">PPT</span> steers a frozen Vision-Language-Action policy at
+        inference time through a lightweight task proxy, without modifying the
+        base model's weights.
+      </h2>
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <!-- Abstract. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            Vision-Language-Action (VLA) models pretrained on broad robot
+            datasets can solve diverse manipulation tasks but often fall short
+            on specific downstream tasks. Full or LoRA fine-tuning improves
+            performance at the cost of overwriting the broad priors the base
+            model acquired during pretraining and requires running an
+            expensive optimization on a model with billions of parameters.
+          </p>
+          <p>
+            We propose <strong>Proxy Policy Tuning</strong> (PPT), an
+            inference-time adaptation method that keeps the base VLA
+            <em>frozen</em> and routes the task signal through a lightweight,
+            standalone task proxy. PPT trains two small proxy policies — a
+            <em>reference proxy</em> distilled from the base on the target
+            task's denoising trajectories, and a <em>task proxy</em>
+            initialized from the reference and fine-tuned on the
+            demonstrations. At inference time, the velocity residual between
+            the two proxies is added to the base sampler's flow-matching
+            velocity field, biasing the denoising trajectory toward task
+            success while preserving the base model's manipulation priors.
+          </p>
+          <p>
+            Across 8 real-world and 4 simulation tasks, PPT delivers up to
+            53% absolute success-rate gains over the base model and
+            consistently outperforms LoRA fine-tuning, while only training
+            proxies that are 1% of the base model's size. PPT also exposes a
+            natural multimodal channel: extra modalities (point clouds,
+            audio) can flow into the task proxy without touching the
+            RGB-only base.
+          </p>
+        </div>
+      </div>
+    </div>
+    <!--/ Abstract. -->
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-3 has-text-centered">Method</h2>
+        <div class="content has-text-justified">
+          <p>
+            PPT trains two small proxy policies and uses their velocity
+            difference to steer the frozen base sampler:
+          </p>
+          <ul>
+            <li>
+              <strong>Reference proxy</strong> <em>v</em><sub>ref</sub>:
+              distilled from the base's denoising trajectories on the
+              target task. It captures the base-like behavior that the
+              proxy architecture can express before any task supervision.
+            </li>
+            <li>
+              <strong>Task proxy</strong> <em>v</em><sub>task</sub>:
+              initialized from <em>v</em><sub>ref</sub>, then fine-tuned on
+              50 task demonstrations with the standard flow-matching loss.
+            </li>
+          </ul>
+          <p>
+            At inference, PPT integrates the guided velocity field
+          </p>
+          <p style="text-align: center;">
+            <em>v&#771;</em>(<em>x</em>, <em>k</em>, <em>o</em>, <em>l</em>) =
+            <em>v</em><sub>base</sub>(<em>x</em>, <em>k</em>, <em>o</em>, <em>l</em>) +
+            γ &middot;
+            [ <em>v</em><sub>task</sub>(<em>x</em>, <em>k</em>, <em>o</em>) &minus;
+              <em>v</em><sub>ref</sub>(<em>x</em>, <em>k</em>, <em>o</em>) ]
+          </p>
+          <p>
+            with the same Euler scheduler the base policy uses, so the residual
+            reshapes the denoising trajectory itself rather than correcting
+            a committed action after the fact. The proxies share initialization
+            and trajectory-level supervision, so their difference isolates
+            the change induced by task fine-tuning instead of unrelated
+            architecture or optimization noise.
+          </p>
+        </div>
+        <img src="./static/images/method.png" alt="PPT method overview"
+             style="width: 100%; max-width: 100%;">
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-3 has-text-centered">Tasks &amp; Results</h2>
+        <div class="content has-text-justified">
+          <p>
+            We evaluate PPT on 8 real-world manipulation tasks and 4
+            simulation tasks, spanning rigid, articulated, and deformable
+            object manipulation. The benchmark mixes tasks the base VLA
+            has seen during pretraining (Tissue, Lever) with challenging
+            out-of-distribution tasks (Coffee, Jeans, Flower).
+          </p>
+        </div>
+        <img src="./static/images/tasks_and_results.png" alt="Tasks and averaged results"
+             style="width: 100%; max-width: 100%;">
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-3 has-text-centered">Robustness</h2>
+        <div class="content has-text-justified">
+          <p>
+            Because PPT leaves the base model untouched, the combined policy
+            inherits the base's recovery and out-of-distribution priors.
+            In Jeans Folding, a human perturbs the rollout mid-execution by
+            unfolding or dragging the cloth; PPT recovers both times and
+            completes the task, while LoRA fine-tuning overfits to the
+            demonstrations and fails after the first perturbation.
+          </p>
+        </div>
+        <img src="./static/images/robustness.png" alt="Recovery and robustness behaviors"
+             style="width: 100%; max-width: 100%;">
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-3 has-text-centered">Multimodal Steering</h2>
+        <div class="content has-text-justified">
+          <p>
+            The proxy architecture is independent of the base VLA's
+            conditioning. We can route an additional modality — a 3D point
+            cloud for the Wood (pouring tea) task or an audio spectrogram
+            for the Phone (ringing-phone identification) task — through the
+            task proxy without modifying the RGB-only base. PPT clears both
+            tasks where the base model and RGB-only baselines fall short.
+          </p>
+        </div>
+        <img src="./static/images/multimodal.png" alt="Multimodal steering with point cloud and audio"
+             style="width: 100%; max-width: 100%;">
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h2 class="title">BibTeX</h2>
+    <pre><code>@article{anonymous2026ppt,
+  author    = {Anonymous Authors},
+  title     = {Proxy Policy Tuning: Inference-Time Adaptation of Robotic Foundation Models},
+  journal   = {Submitted to the Conference on Robot Learning (CoRL)},
+  year      = {2026}
+}</code></pre>
+  </div>
+</section>
+
+
+<footer class="footer">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+          <p>
+            This webpage template is adapted from
+            <a href="https://github.com/nerfies/nerfies.github.io">Nerfies</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
