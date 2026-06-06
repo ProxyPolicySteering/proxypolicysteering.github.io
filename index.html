@@ -109,13 +109,12 @@
           <strong>Reference proxy</strong>
           <em>v</em><sub>ref</sub>: distilled from the base's denoising
           trajectories on the target task. It captures the base-like
-          behavior that the proxy architecture can express before any task
-          supervision.
+          behavior on this specific task that the proxy architecture can express.
         </li>
         <li>
           <strong>Task proxy</strong>
           <em>v</em><sub>task</sub>: initialized from
-          <em>v</em><sub>ref</sub>, then fine-tuned on 50 task
+          <em>v</em><sub>ref</sub>, then fine-tuned on task
           demonstrations with the standard flow-matching loss.
         </li>
       </ul>
@@ -130,12 +129,8 @@
       </div>
 
       <p>
-        with the same Euler scheduler the base policy uses, so the residual
-        reshapes the denoising trajectory itself rather than correcting a
-        committed action after the fact. The proxies share initialization
-        and trajectory-level supervision, so their difference isolates the
-        change induced by task fine-tuning instead of unrelated
-        architecture or optimization noise.
+        their velocity-space residual captures the task-induced distribution shift and steers the
+        frozen base policy at inference to apprximate a fine-tuned distribution.
       </p>
     </section>
 
@@ -144,11 +139,10 @@
 
       <p>
         We evaluate PPS on 8 real-world manipulation tasks and 4 simulation
-        tasks, spanning rigid, articulated, and deformable object
-        manipulation. The benchmark mixes tasks the base model has seen
-        during pretraining (Tissue Wiping, Lever Pressing) with challenging
-        out-of-distribution tasks (Coffee Brewing, Jeans Folding, Flower
-        Arrangement). PPS delivers consistent gains over the base model and
+        tasks, spanning long-horizon goals, articulated and deformable objects, and diverse
+        skills. The benchmark mixes tasks the base model has seen
+        during pretraining with challenging
+        out-of-distribution tasks. PPS delivers consistent gains over the base model and
         over the fine-tuning, training-from-scratch, and RL-based baselines
         on both averages.
       </p>
