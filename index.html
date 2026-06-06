@@ -52,9 +52,11 @@
     </header>
 
     <figure class="figure">
-      <video src="./static/images/introduction.mp4"
-             autoplay muted loop playsinline controls
-             style="width: 100%; display: block;"></video>
+      <video autoplay muted loop playsinline preload="auto"
+             style="width: 100%; display: block;">
+        <source src="./static/images/introduction.mp4" type="video/mp4">
+        Your browser does not support the HTML5 video tag.
+      </video>
       <figcaption class="teaser-caption">
         <strong>PPS</strong> steers a frozen robotic foundation model at
         inference time through a lightweight task proxy, without modifying
@@ -63,7 +65,7 @@
     </figure>
 
     <section class="section" id="abstract">
-      <div class="tagline">Abstract.</div>
+      <div class="tagline">Abstract</div>
 
       <p>
         Robotics foundation models carry broad manipulation priors from
@@ -93,7 +95,7 @@
     </section>
 
     <section class="section" id="method">
-      <div class="tagline">Method.</div>
+      <div class="tagline">Method</div>
 
       <figure class="figure">
         <img src="./static/images/teaser_5.png" alt="PPS method overview">
@@ -144,7 +146,7 @@
     </section>
 
     <section class="section" id="tasks">
-      <div class="tagline">Tasks &amp; Results.</div>
+      <div class="tagline">Tasks &amp; Results</div>
 
       <p>
         We evaluate PPS on 8 real-world manipulation tasks and 4 simulation
@@ -168,7 +170,7 @@
     </section>
 
     <section class="section" id="robustness">
-      <div class="tagline">Robustness.</div>
+      <div class="tagline">Robustness</div>
 
       <p>
         Because PPS leaves the base model untouched, the combined policy
@@ -191,7 +193,7 @@
     </section>
 
     <section class="section" id="multimodal">
-      <div class="tagline">Multimodal Steering.</div>
+      <div class="tagline">Multimodal Steering</div>
 
       <p>
         The proxy architecture is independent of the base model's
@@ -213,7 +215,7 @@
     </section>
 
     <section class="section" id="bibtex">
-      <div class="tagline">BibTeX.</div>
+      <div class="tagline">BibTeX</div>
 
 <pre>@article{anonymous2026pps,
   author    = {Anonymous Authors},
