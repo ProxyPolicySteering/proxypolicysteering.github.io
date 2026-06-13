@@ -20,7 +20,7 @@
 
       <div class="authors">
         Anonymous Authors
-        <span class="affiliation">Submitted to CoRL 2026</span>
+        <!-- <span class="affiliation">Submitted to CoRL 2026</span> -->
       </div>
 
       <!--
@@ -119,8 +119,7 @@
       <div class="tagline stat-tagline">+53% on Real-world Tasks</div>
 
       <p>
-        We evaluate PPS on 8 real-world manipulation tasks and 4 simulation
-        tasks, spanning long-horizon goals, articulated and deformable
+        We evaluate PPS on 8 real-world manipulation tasks, spanning long-horizon goals, articulated and deformable
         objects, and diverse skills. The benchmark mixes tasks the base
         model has seen during pretraining with challenging
         out-of-distribution tasks. PPS delivers consistent gains over the
@@ -193,11 +192,9 @@
       <div class="tagline stat-tagline">+51% on Simulation Tasks</div>
 
       <p>
-        In simulation we run 100 rollouts per task for tight statistics.
-        PPS lifts the &pi;<sub>0.5</sub> base policy by 51% absolute
-        success rate on average across four tasks &mdash; Fruit Weighing,
-        Egg Cooking, Tea Pouring, and Capsule Loading &mdash; and
-        outperforms LoRA, specialist, residual, and DSRL baselines on
+        In simulation, PPS lifts the &pi;<sub>0.5</sub> base policy by 51% absolute
+        success rate on average across four tasks,
+        outperforming LoRA, specialist, residual, and DSRL baselines on
         every task.
       </p>
 
@@ -243,7 +240,7 @@
     </section>
 
     <section class="section" id="robustness">
-      <div class="tagline">Recovery Behaviors</div>
+      <div class="tagline">Robustness under Perturbations</div>
 
       <p>
         Because PPS leaves the base model intact, the combined policy
@@ -252,7 +249,7 @@
       </p>
 
       <div class="recovery-grid">
-        <div class="recovery-col-header">PPS</div>
+        <div class="recovery-col-header">PPS (Ours)</div>
         <div class="recovery-col-header">LoRA</div>
 
         <div class="recovery-cell">
@@ -280,7 +277,7 @@
     </section>
 
     <section class="section" id="multimodal">
-      <div class="tagline">Cross-modality Steering</div>
+      <div class="tagline">Cross-Modality Steering</div>
 
       <p>
         The proxy architecture is independent of the base model's
