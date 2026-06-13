@@ -13,30 +13,14 @@
 </head>
 <body>
 
-  <nav class="toc" aria-label="Table of contents">
-    <h3>Contents</h3>
-    <hr class="toc-line">
-    <ul>
-      <li><a href="#abstract">Abstract</a></li>
-      <li><a href="#method">Method</a></li>
-      <li><a href="#tasks">Real-world Results</a></li>
-      <li><a href="#robustness">Recovery Behaviors</a></li>
-      <li><a href="#multimodal">Cross-modality Steering</a></li>
-    </ul>
-  </nav>
-
   <main class="main">
 
     <header>
       <h1 class="hero-title">Proxy Policy Steering</h1>
-      <div class="hero-subtitle">
-        Inference-Time Adaptation of Robotic Foundation Models
-      </div>
 
       <div class="authors">
         Anonymous Authors
         <span class="affiliation">Submitted to CoRL 2026</span>
-        <span class="review-note">under double-blind review &mdash; identifying details withheld</span>
       </div>
 
       <!--
@@ -132,7 +116,7 @@
     </section>
 
     <section class="section" id="tasks">
-      <div class="tagline">Real-world Results</div>
+      <div class="tagline">Specializing the Base on 8 Real-world Tasks</div>
 
       <p>
         We evaluate PPS on 8 real-world manipulation tasks and 4 simulation
@@ -143,11 +127,6 @@
         base model and outperforms fine-tuned models, training-from-scratch policies, and
         prior steering-based baselines.
       </p>
-
-      <figure class="figure">
-        <img src="./static/images/results_merged_web.png"
-             alt="Per-task success rate across models, with the average column at the right">
-      </figure>
 
       <div class="video-gallery" id="resultsGallery">
         <div class="video-gallery-track" id="resultsGalleryTrack">
@@ -203,6 +182,11 @@
                   data-direction="right">&rsaquo;</button>
         </div>
       </div>
+
+      <figure class="figure">
+        <img src="./static/images/results_merged_web.png"
+             alt="Per-task success rate across models, with the average column at the right">
+      </figure>
     </section>
 
     <section class="section" id="robustness">
