@@ -469,32 +469,43 @@
     var g = this.gamma, self = this;
     var ppsCol = ppsColorAt(g, p);
 
-    // (1) PPS distribution as two Gaussian kernels at *fixed* positions —
-    // only the covariances morph with γ, from the base config (γ=0) to the
-    // PPS config (γ=1). Covariances are taken straight from
-    // plot_flow_matching.py's _right_pdf_base and _right_pdf_pps.
-    var muA = { x: -0.18, y: 0.30 };
-    var muB = { x:  0.16, y: 0.74 };
-    var covA0 = [0.60, -0.40, 1.00];   // plot.base mode 1
-    var covB0 = [0.80,  0.00, 0.55];   // plot.base mode 2
-    var covA1 = [0.36, -0.21, 0.84];   // plot.pps  mode 1
-    var covB1 = [0.30, -0.19, 0.95];   // plot.pps  mode 2
+    // (1) PPS distribution as two Gaussian kernels. Means *and* covariances
+    // interpolate from the base config (γ=0) to the PPS config (γ=1) —
+    // the kernels move because plot_flow_matching.py's base and pps modes
+    // sit at different positions. The values here come from that file's
+    // _right_pdf_base / _right_pdf_pps modes, mapped through its 90° CW
+    // image rotation, a y-flip (canvas y points down), and a per-axis
+    // scale (canvas-x ← plot-y, canvas-y ← plot-x). Relative to the noise
+    // distribution at N, the kernel offsets are preserved.
+    var muA0 = { x:  0.34, y: 0.09 };   // ← plot.base mode 1  [1.1, 1.3]
+    var muB0 = { x: -0.48, y: 0.40 };   // ← plot.base mode 2  [2.6,-1.5]
+    var muA1 = { x:  0.55, y: 0.44 };   // ← plot.pps  mode 1  [2.8, 2.0]
+    var muB1 = { x:  0.34, y: 0.09 };   // ← plot.pps  mode 2  [1.1, 1.3]
+    var covA0 = [0.0858, -0.0238, 0.0247];   // ← T·Σ_base1·T^T
+    var covB0 = [0.0472,  0.0000, 0.0330];   // ← T·Σ_base2·T^T
+    var covA1 = [0.0721, -0.0125, 0.0148];   // ← T·Σ_pps1·T^T
+    var covB1 = [0.0815, -0.0113, 0.0124];   // ← T·Σ_pps2·T^T
 
     var gC = Math.min(1, Math.max(0, g));
+    var muA = lerpMu(muA0, muA1, gC);
+    var muB = lerpMu(muB0, muB1, gC);
     var covA = lerpCov(covA0, covA1, gC);
     var covB = lerpCov(covB0, covB1, gC);
     var eA = covEig(covA), eB = covEig(covB);
 
-    // visScale: world units per source-σ. Bumped from MS·0.95 → MS·1.55
-    // so the contour bands are clearly visible at the canvas size.
-    var KS = MS * 1.55;
+    // Covariances are already in canvas coords (post-rotation, y-down,
+    // pre-scaled). Outer contour band = 2σ in canvas units. A slight
+    // overall down-scale (0.9) leaves a bit of margin around the kernels.
+    var KS = 0.90;
     var rxA = KS * Math.sqrt(eA.lmax) * 2, ryA = KS * Math.sqrt(eA.lmin) * 2;
     var rxB = KS * Math.sqrt(eB.lmax) * 2, ryB = KS * Math.sqrt(eB.lmin) * 2;
-    // Canvas y points down (world y is flipped on screen) → negate angle.
-    this.ellipseBands(ctx, muA, rxA, ryA, -eA.theta, ppsCol, 0.22);
-    this.ellipseBands(ctx, muB, rxB, ryB, -eB.theta, ppsCol, 0.22);
+    // No -theta negation: the cov has already been carried into canvas
+    // coords, so atan2 gives the angle in canvas-clockwise sense, which is
+    // exactly what ctx.rotate expects.
+    this.ellipseBands(ctx, muA, rxA, ryA, eA.theta, ppsCol, 0.22);
+    this.ellipseBands(ctx, muB, rxB, ryB, eB.theta, ppsCol, 0.22);
 
-    // Caption: place under the bottom-most extent of either mode (world y
+    // Caption: just below the bottom-most extent of either mode (world y
     // increases downward on canvas, so larger y = lower on screen).
     var bottomY = Math.max(muA.y + Math.max(rxA, ryA),
                            muB.y + Math.max(rxB, ryB));
@@ -503,6 +514,15 @@
     ctx.fillStyle = ppsCol;
     ctx.fillText('PPS distribution', this.W2S(labelAnchor).x,
                  this.W2S(labelAnchor).y + 14);
+
+    // Steer the lead-particle rollout toward the kernel centroid so the
+    // path always lands inside the displayed distribution. Without this
+    // the path keeps targeting the original B/T endpoints and drifts away
+    // from the kernels.
+    var baseCentroid = { x: (muA0.x + muB0.x) / 2, y: (muA0.y + muB0.y) / 2 };
+    var ppsCentroid  = { x: (muA1.x + muB1.x) / 2, y: (muA1.y + muB1.y) / 2 };
+    this.particles[0].bi = baseCentroid;
+    this.particles[0].ti = ppsCentroid;
 
     // (2) Single denoising rollout noise → action; end-of-path colour
     // matches the PPS-distribution colour so the path lands inside its mode.
