@@ -190,10 +190,105 @@
         base policy and LoRA fine-tuning are below. Step through the tasks with
         the arrows or dots.
       </p>
-      <div class="pps-embed-block">
-        <iframe class="pps-embed-frame" data-embed src="./static/modules/compare.html"
-                title="Baseline comparison carousel" scrolling="no" loading="lazy"></iframe>
+      <!-- Comparison videos use the EXACT same display method as the Real-World
+           Tasks grid above: plain declarative <video src> tags, no JS source
+           swapping, no posters, no clipping wrapper. Tabs just show/hide whole
+           task panels; the videos themselves render identically to the ones that
+           already work on this page. -->
+      <style>
+        .ppsc { --ppsc-line:#e4dcc8; --ppsc-soft:#efece4; --ppsc-sub:#6b6453; --ppsc-ink:#1b1b1b;
+          --ppsc-panel:#fffdf8; --ppsc-pps:#4f9d5d; --ppsc-base:#8a72b3; --ppsc-lora:#c0563f; margin:14px 0 4px; }
+        .ppsc *, .ppsc *::before, .ppsc *::after { box-sizing:border-box; }
+        .ppsc-tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
+        .ppsc-tabs button { font:600 14px/1 inherit; color:var(--ppsc-sub); background:var(--ppsc-panel);
+          border:1px solid var(--ppsc-line); border-radius:10px; padding:9px 16px; cursor:pointer; transition:all .18s ease; }
+        .ppsc-tabs button:hover { background:var(--ppsc-soft); }
+        .ppsc-tabs button.on { background:var(--ppsc-ink); color:#fff; border-color:var(--ppsc-ink); }
+        .ppsc-stage { background:var(--ppsc-panel); border:1px solid var(--ppsc-line); border-radius:16px; padding:18px; }
+        .ppsc-panel { display:none; }
+        .ppsc-panel.on { display:block; }
+        /* rounding/border on the <video> itself, exactly like .result-video */
+        .ppsc-hero { position:relative; line-height:0; }
+        .ppsc-hero video { display:block; width:100%; aspect-ratio:16/9; object-fit:cover;
+          background:#000; border-radius:12px; border:2.5px solid var(--ppsc-pps); }
+        .ppsc-tag { position:absolute; left:14px; top:14px; display:inline-flex; align-items:center; gap:6px;
+          font-size:12.5px; line-height:1; font-weight:700; color:#fff; padding:5px 11px; border-radius:999px; }
+        .ppsc-tag.pps { background:var(--ppsc-pps); } .ppsc-tag.base { background:var(--ppsc-base); } .ppsc-tag.lora { background:var(--ppsc-lora); }
+        .ppsc-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:14px; }
+        @media (max-width:560px){ .ppsc-row { grid-template-columns:1fr; } }
+        .ppsc-item { position:relative; line-height:0; }
+        .ppsc-item video { display:block; width:100%; aspect-ratio:16/9; object-fit:cover;
+          background:#000; border-radius:11px; border:2px solid var(--ppsc-line); }
+        .ppsc-foot { margin-top:16px; font-size:12.5px; color:var(--ppsc-sub); text-align:center; }
+      </style>
+      <div class="ppsc">
+        <div class="ppsc-tabs" id="ppsc-tabs">
+          <button class="on" data-i="0">Coffee Brewing</button>
+          <button data-i="1">Flower Arrangement</button>
+          <button data-i="2">Jeans Folding</button>
+          <button data-i="3">Tissue Wiping</button>
+        </div>
+        <div class="ppsc-stage">
+          <div class="ppsc-panel on" data-i="0">
+            <div class="ppsc-hero"><span class="ppsc-tag pps">★ PPS (Ours)</span>
+              <video src="./static/videos/compare/coffee_pps.mp4" autoplay muted loop playsinline preload="metadata"></video></div>
+            <div class="ppsc-row">
+              <div class="ppsc-item"><span class="ppsc-tag base">Base (&pi;&#8320;.&#8325;)</span>
+                <video src="./static/videos/compare/coffee_base.mp4" autoplay muted loop playsinline preload="metadata"></video></div>
+              <div class="ppsc-item"><span class="ppsc-tag lora">LoRA</span>
+                <video src="./static/videos/compare/coffee_lora.mp4" autoplay muted loop playsinline preload="metadata"></video></div>
+            </div>
+          </div>
+          <div class="ppsc-panel" data-i="1">
+            <div class="ppsc-hero"><span class="ppsc-tag pps">★ PPS (Ours)</span>
+              <video src="./static/videos/compare/flower_pps.mp4" autoplay muted loop playsinline preload="metadata"></video></div>
+            <div class="ppsc-row">
+              <div class="ppsc-item"><span class="ppsc-tag base">Base (&pi;&#8320;.&#8325;)</span>
+                <video src="./static/videos/compare/flower_base.mp4" autoplay muted loop playsinline preload="metadata"></video></div>
+              <div class="ppsc-item"><span class="ppsc-tag lora">LoRA</span>
+                <video src="./static/videos/compare/flower_lora.mp4" autoplay muted loop playsinline preload="metadata"></video></div>
+            </div>
+          </div>
+          <div class="ppsc-panel" data-i="2">
+            <div class="ppsc-hero"><span class="ppsc-tag pps">★ PPS (Ours)</span>
+              <video src="./static/videos/compare/jeans_pps.mp4" autoplay muted loop playsinline preload="metadata"></video></div>
+            <div class="ppsc-row">
+              <div class="ppsc-item"><span class="ppsc-tag base">Base (&pi;&#8320;.&#8325;)</span>
+                <video src="./static/videos/compare/jeans_base.mp4" autoplay muted loop playsinline preload="metadata"></video></div>
+              <div class="ppsc-item"><span class="ppsc-tag lora">LoRA</span>
+                <video src="./static/videos/compare/jeans_lora.mp4" autoplay muted loop playsinline preload="metadata"></video></div>
+            </div>
+          </div>
+          <div class="ppsc-panel" data-i="3">
+            <div class="ppsc-hero"><span class="ppsc-tag pps">★ PPS (Ours)</span>
+              <video src="./static/videos/compare/tissue_pps.mp4" autoplay muted loop playsinline preload="metadata"></video></div>
+            <div class="ppsc-row">
+              <div class="ppsc-item"><span class="ppsc-tag base">Base (&pi;&#8320;.&#8325;)</span>
+                <video src="./static/videos/compare/tissue_base.mp4" autoplay muted loop playsinline preload="metadata"></video></div>
+              <div class="ppsc-item"><span class="ppsc-tag lora">LoRA</span>
+                <video src="./static/videos/compare/tissue_lora.mp4" autoplay muted loop playsinline preload="metadata"></video></div>
+            </div>
+          </div>
+        </div>
       </div>
+      <script>
+      (function () {
+        var tabs = document.querySelectorAll('#ppsc-tabs button');
+        var panels = document.querySelectorAll('.ppsc-panel');
+        function show(i) {
+          tabs.forEach(function (b) { b.classList.toggle('on', +b.dataset.i === i); });
+          panels.forEach(function (p) {
+            var on = +p.dataset.i === i;
+            p.classList.toggle('on', on);
+            p.querySelectorAll('video').forEach(function (v) {
+              if (on) { var pr = v.play(); if (pr && pr.catch) pr.catch(function () {}); }
+              else { v.pause(); }
+            });
+          });
+        }
+        tabs.forEach(function (b) { b.onclick = function () { show(+b.dataset.i); }; });
+      })();
+      </script>
 
       <div class="subheader">Real-World Tasks</div>
       <p class="stat-line">
@@ -464,14 +559,24 @@
       });
     });
 
-    // ADDED: auto-size the interactive-module iframes to their content.
-    // Modules post their height (pps-embed.js); we also poll the same-origin
-    // document directly as a robust fallback.
+    // Auto-size the interactive-module iframes to their content. Modules post
+    // their height (pps-embed.js); we also measure the same-origin document as a
+    // fallback. Only apply a height when it MEANINGFULLY changes, and stop after
+    // a short settle window — no perpetual polling — so the page can't keep
+    // jittering/shifting after load.
+    var ppsLastH = {};
+    function ppsApply(f, h) {
+      if (!(h > 40)) return;
+      var k = f.getAttribute('src') || f.src;
+      if (Math.abs((ppsLastH[k] || 0) - h) <= 2) return; // ignore sub-pixel churn
+      ppsLastH[k] = h;
+      f.style.height = (h + 2) + 'px';
+    }
     window.addEventListener('message', function (e) {
       var d = e.data;
       if (!d || typeof d.ppsEmbedHeight !== 'number') return;
       document.querySelectorAll('iframe[data-embed]').forEach(function (f) {
-        if (f.contentWindow === e.source) f.style.height = (d.ppsEmbedHeight + 2) + 'px';
+        if (f.contentWindow === e.source) ppsApply(f, d.ppsEmbedHeight);
       });
     });
     (function () {
@@ -480,16 +585,38 @@
           try {
             var doc = f.contentDocument;
             if (!doc || !doc.body) return;
-            var h = Math.max(doc.body.scrollHeight, doc.documentElement.scrollHeight);
-            if (h > 40) f.style.height = (h + 2) + 'px';
+            ppsApply(f, Math.max(doc.body.scrollHeight, doc.documentElement.scrollHeight));
           } catch (err) {}
         });
       }
-      document.querySelectorAll('iframe[data-embed]').forEach(function (f) { f.style.height = '640px'; });
-      var n = 0, poll = setInterval(function () { sizeFromDoc(); if (++n > 40) clearInterval(poll); }, 400);
+      // Grow from natural height; a few settle checks, then stop (no 16s poll).
+      [0, 200, 500, 1000, 2000].forEach(function (t) { setTimeout(sizeFromDoc, t); });
       window.addEventListener('resize', sizeFromDoc);
-      window.addEventListener('load', function () { setTimeout(sizeFromDoc, 200); });
+      window.addEventListener('load', sizeFromDoc);
     })();
+  </script>
+
+  <!-- Play only the videos currently on screen; pause the rest. A page with
+       many simultaneously-playing videos exhausts the browser's video
+       compositing slots, which makes some videos (the carousel) render blank
+       even though they decode fine. Limiting playback to the viewport fixes
+       that and cuts CPU/GPU/battery use. -->
+  <script>
+  (function () {
+    var vids = document.querySelectorAll('video');
+    if (!('IntersectionObserver' in window) || !vids.length) return;
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        var v = e.target;
+        if (e.isIntersecting) {
+          if (v.paused) { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
+        } else if (!v.paused) {
+          v.pause();
+        }
+      });
+    }, { rootMargin: '150px 0px', threshold: 0.01 });
+    vids.forEach(function (v) { io.observe(v); });
+  })();
   </script>
 
 </body>
