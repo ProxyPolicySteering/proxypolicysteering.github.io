@@ -370,7 +370,7 @@ header {
   position: relative;
   height: 5px;
   border-radius: 999px;
-  background: rgba(253, 250, 244, 0.32);
+  background: rgba(27, 27, 27, 0.78);  /* same dark pill as the buttons */
   cursor: pointer;
   overflow: hidden;
 }
