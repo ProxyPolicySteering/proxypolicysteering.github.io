@@ -219,11 +219,16 @@
   // wrap around both peaks — *merging* — instead of one ellipse stack
   // overpainting the other.
   //
-  // Implementation: sample the summed PDF on a small offscreen grid,
-  // quantize into bands by density relative to the per-frame peak, and
-  // blit the result. Cached per-γ so static frames are free.
+  // Alpha schedule reproduces densityBlob's *composite* output: each
+  // densityBlob band is drawn over the previous, so the centre pixel ends
+  // up at composite alpha ≈ 1 − ∏(1−αᵢ) ≈ 0.60 with peak=0.22 (not 0.22
+  // as a naive single-band lookup would give). Matching that composite
+  // is what makes the merged renderer read with the same colour weight
+  // as the rest of the page.
+  //
+  // Cached per-(γ, color) so static frames are free.
   Diagram.prototype.drawDensityField = function (ctx, kernels, col, peak) {
-    var W = 220, H = 165;
+    var W = 520, H = 390;
     var df = this._df;
     if (!df || df.W !== W) {
       var off = document.createElement('canvas');
@@ -237,8 +242,7 @@
       df.img = df.octx.createImageData(W, H);
     }
 
-    // Cache key: kernel parameters + color (alpha bake). Skip the
-    // per-pixel work when nothing changed since the last frame.
+    // Cache key: kernel parameters + color + peak.
     var key = col + '|' + peak;
     for (var ki = 0; ki < kernels.length; ki++) {
       var kk = kernels[ki];
@@ -246,72 +250,100 @@
              ',' + kk.cov[0].toFixed(5) + ',' + kk.cov[1].toFixed(5) +
              ',' + kk.cov[2].toFixed(5);
     }
+
     if (key !== df.cacheKey) {
       df.cacheKey = key;
 
-      // Per-kernel constants.
-      var KP = [];
+      var dx = (WORLD.x1 - WORLD.x0) / W;
+      var dy = (WORLD.y1 - WORLD.y0) / H;
+      var dens = df.dens;
+      dens.fill(0);
+
+      // Accumulate per-kernel density into the grid, only within a 3.5σ
+      // bounding box (everything outside is < 0.2% of peak and already 0).
       for (var k = 0; k < kernels.length; k++) {
         var c = kernels[k].cov;
         var det = Math.max(1e-12, c[0] * c[2] - c[1] * c[1]);
-        KP.push({
-          mx: kernels[k].mu.x, my: kernels[k].mu.y,
-          a: c[0], b: c[1], cc: c[2], invDet: 1 / det,
-          norm: 1 / (2 * Math.PI * Math.sqrt(det))
-        });
-      }
+        var a = c[0], b = c[1], cc = c[2];
+        var invDet = 1 / det;
+        var norm = 1 / (2 * Math.PI * Math.sqrt(det));
+        var mx = kernels[k].mu.x, my = kernels[k].mu.y;
+        var eig = covEig(c);
+        var reach = 3.5 * Math.sqrt(eig.lmax);
 
-      var dx = (WORLD.x1 - WORLD.x0) / W;
-      var dy = (WORLD.y1 - WORLD.y0) / H;
-      var dens = df.dens, maxD = 0;
+        var i_min = Math.max(0, Math.floor((mx - reach - WORLD.x0) / dx));
+        var i_max = Math.min(W, Math.ceil((mx + reach - WORLD.x0) / dx));
+        var j_min = Math.max(0, Math.floor((my - reach - WORLD.y0) / dy));
+        var j_max = Math.min(H, Math.ceil((my + reach - WORLD.y0) / dy));
 
-      for (var j = 0; j < H; j++) {
-        var wy = WORLD.y0 + (j + 0.5) * dy;
-        for (var i = 0; i < W; i++) {
-          var wx = WORLD.x0 + (i + 0.5) * dx;
-          var d = 0;
-          for (var p = 0; p < KP.length; p++) {
-            var kp = KP[p];
-            var ex = wx - kp.mx, ey = wy - kp.my;
-            var q = (kp.cc * ex * ex - 2 * kp.b * ex * ey + kp.a * ey * ey) * kp.invDet;
-            d += kp.norm * Math.exp(-0.5 * q);
+        for (var j = j_min; j < j_max; j++) {
+          var wy = WORLD.y0 + (j + 0.5) * dy;
+          var ey = wy - my;
+          for (var i = i_min; i < i_max; i++) {
+            var wx = WORLD.x0 + (i + 0.5) * dx;
+            var ex = wx - mx;
+            var q = (cc * ex * ex - 2 * b * ex * ey + a * ey * ey) * invDet;
+            dens[j * W + i] += norm * Math.exp(-0.5 * q);
           }
-          dens[j * W + i] = d;
-          if (d > maxD) maxD = d;
         }
       }
 
-      // Threshold-and-alpha schedule mirrors densityBlob's banding so
-      // the merged renderer slots into the existing visual vocabulary.
-      var THRESH = [0.04, 0.16, 0.34, 0.55, 0.78];
-      var ALPHA  = [0.28, 0.43, 0.57, 0.72, 1.00];
-      var rgb = parse(col);
-      var aB = new Uint8Array(ALPHA.length);
-      for (var s = 0; s < ALPHA.length; s++) aB[s] = Math.round(ALPHA[s] * peak * 255);
+      var maxD = 0, N = W * H;
+      for (var p = 0; p < N; p++) if (dens[p] > maxD) maxD = dens[p];
 
-      var data = df.img.data, N = W * H;
+      var data = df.img.data;
       if (maxD <= 0) {
         for (var z = 0; z < N; z++) data[z * 4 + 3] = 0;
+        df.octx.putImageData(df.img, 0, 0);
       } else {
+        // 6 density bands, innermost first. Thresholds chosen so a single
+        // Gaussian renders as 6 concentric rings matching densityBlob's
+        // R · i/6 radii.
+        var BANDS = 6;
+        var THRESH = [0.94, 0.80, 0.60, 0.41, 0.25, 0.14];
+
+        // Per-band alphas from densityBlob (innermost = α₁, outermost = α₆).
+        var perBand = new Array(BANDS);
+        for (var bi = 0; bi < BANDS; bi++) {
+          var i1 = bi + 1;
+          perBand[bi] = peak * (1 - 0.72 * (i1 - 1) / (BANDS - 1));
+        }
+
+        // Cumulative composite alpha for a pixel in band bi (innermost-first):
+        //   bi = 0 → inside all bands → 1 − ∏ᵢ (1 − αᵢ)
+        //   bi = 5 → inside only the outermost → α₆
+        var aB = new Uint8Array(BANDS);
+        var prod = 1;
+        for (var bi2 = BANDS - 1; bi2 >= 0; bi2--) {
+          prod *= (1 - perBand[bi2]);
+          aB[bi2] = Math.round((1 - prod) * 255);
+        }
+
+        var rgb = parse(col);
+        var rgb0 = rgb[0], rgb1 = rgb[1], rgb2 = rgb[2];
         var invMax = 1 / maxD;
         for (var pp = 0; pp < N; pp++) {
           var dN = dens[pp] * invMax;
-          var bi = -1;
-          for (var t = THRESH.length - 1; t >= 0; t--) {
-            if (dN >= THRESH[t]) { bi = t; break; }
-          }
+          var bandIdx = -1;
+          // Check innermost threshold first (highest density gets highest alpha).
+          if      (dN >= THRESH[0]) bandIdx = 0;
+          else if (dN >= THRESH[1]) bandIdx = 1;
+          else if (dN >= THRESH[2]) bandIdx = 2;
+          else if (dN >= THRESH[3]) bandIdx = 3;
+          else if (dN >= THRESH[4]) bandIdx = 4;
+          else if (dN >= THRESH[5]) bandIdx = 5;
           var idx = pp * 4;
-          if (bi < 0) {
+          if (bandIdx < 0) {
             data[idx + 3] = 0;
           } else {
-            data[idx]     = rgb[0];
-            data[idx + 1] = rgb[1];
-            data[idx + 2] = rgb[2];
-            data[idx + 3] = aB[bi];
+            data[idx]     = rgb0;
+            data[idx + 1] = rgb1;
+            data[idx + 2] = rgb2;
+            data[idx + 3] = aB[bandIdx];
           }
         }
+        df.octx.putImageData(df.img, 0, 0);
       }
-      df.octx.putImageData(df.img, 0, 0);
     }
 
     var tl = this.W2S({ x: WORLD.x0, y: WORLD.y0 });
