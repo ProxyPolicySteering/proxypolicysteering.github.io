@@ -129,9 +129,12 @@
       var s = i / STEPS;
       var vx = (Lx - x) * GAIN, vy = (Ly - y) * GAIN;
       var env = Math.sin(Math.min(1, s) * Math.PI) * 0.9;
-      // Stronger perpendicular swirl (0.22 → 0.85) so the rollout reads
-      // as a curved flow-matching path rather than a near-straight line.
-      vx += -(Ly - y) * 0.85 * env; vy += (Lx - x) * 0.85 * env;
+      // Swirl coefficient varies with γ so the path's *shape* (not just
+      // its endpoint) changes as you drag the slider: heavy bow one way
+      // at γ=0, straightens around γ≈0.5, then bows the opposite way at
+      // γ=1. Magnitude 1.10 gives a clearly visible arc without looping.
+      var swirl = 1.10 * (1 - 2 * Math.min(1, Math.max(0, g)));
+      vx += -(Ly - y) * swirl * env; vy += (Lx - x) * swirl * env;
       x += vx * dt; y += vy * dt;
       path.push({ x: x, y: y });
     }
