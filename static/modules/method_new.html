@@ -56,31 +56,49 @@
   .toggle button.on { background: var(--panel); color: var(--ink); box-shadow: var(--shadow); }
   .toggle .tlabel { display:block; font-size: 10px; font-weight: 500; opacity: .7; margin-top: 1px; }
 
-  /* control bar */
-  .bar { margin-top: 24px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
-  .bar .cap { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .1em;
-    text-transform: uppercase; color: var(--sub); }
-  .seg { display: inline-flex; padding: 3px; background: var(--soft); border: 1px solid var(--line); border-radius: 9px; gap: 2px; }
-  .seg button { font-family: var(--font-original); font-size: 12.5px; font-weight: 600; color: var(--sub);
-    background: transparent; border: 0; cursor: pointer; padding: 7px 13px; border-radius: 7px; transition: all .18s ease; }
-  .seg button.on { background: var(--panel); color: var(--ink); box-shadow: var(--shadow); }
-
   .module { margin-top: 14px; background: var(--panel); border: 1px solid var(--line);
     border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; }
-  .grid { display: grid; grid-template-columns: 1.55fr 1fr; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; }
   @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
 
   .fieldwrap { position: relative; border-right: 1px solid var(--line); }
   @media (max-width: 860px) { .fieldwrap { border-right: 0; border-bottom: 1px solid var(--line); } }
   #field { display: block; width: 100%; height: 460px; }
   @media (max-width: 860px) { #field { height: 380px; } }
-  .badge { position: absolute; top: 14px; right: 14px; font-family: var(--font-mono);
-    font-size: 10.5px; color: var(--sub); background: var(--bg); border: 1px solid var(--line);
-    padding: 5px 9px; border-radius: 7px; }
-  .vhint { position: absolute; bottom: 14px; left: 16px; right: 16px; font-size: 12px; line-height: 1.4;
-    color: var(--sub); pointer-events: none; }
 
-  .side { padding: 22px 22px 24px; display: flex; flex-direction: column; gap: 18px; }
+  /* Teaser image + animated green-trajectory overlay (right pane). */
+  .teaserwrap {
+    position: relative;
+    line-height: 0;
+    align-self: stretch;
+    background: var(--soft);
+  }
+  .teaserwrap img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .teaserwrap canvas.teaser-overlay {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  /* Below-the-box bar holding the equation and the slider. */
+  .below {
+    margin-top: 14px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    padding: 22px 24px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
   .eq { font-family: var(--font-math); font-size: 17px; line-height: 1.6; text-align: center;
     white-space: nowrap; letter-spacing: -0.2px;
     background: var(--soft); border-left: 3px solid var(--eqborder); border-radius: 4px;
@@ -103,27 +121,6 @@
   .ticks { display: flex; justify-content: space-between; font-family: var(--font-mono);
     font-size: 10px; color: var(--sub); margin-top: 4px; }
 
-  .btns { display: flex; gap: 8px; }
-  .btns button { flex: 1; font-family: var(--font-original); font-size: 13px; font-weight: 600;
-    color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
-    padding: 9px 10px; cursor: pointer; transition: background .15s ease; }
-  .btns button:hover { background: var(--soft); }
-
-  .curvewrap { background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 6px 6px 2px; }
-  .curve-title { font-size: 11px; font-weight: 600; color: var(--sub); padding: 6px 8px 2px; display:flex; justify-content: space-between; }
-  #curve { display: block; width: 100%; height: 150px; }
-
-  .verdict { display: flex; gap: 11px; align-items: flex-start; padding: 13px 14px; border-radius: 8px; background: var(--soft); }
-  .dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 4px; flex: 0 0 auto; background: var(--good); }
-  .verdict .vh { font-size: 13.5px; font-weight: 600; margin: 0 0 2px; }
-  .verdict .vp { font-size: 12.5px; line-height: 1.45; color: var(--sub); margin: 0; }
-
-  .caption { margin-top: 22px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
-  @media (max-width: 720px) { .caption { grid-template-columns: 1fr; } }
-  .caption .n { font-family: var(--font-mono); font-size: 11px; color: var(--resid); margin: 0 0 6px; }
-  .caption h3 { font-size: 15px; margin: 0 0 5px; font-weight: 600; }
-  .caption p { font-size: 13px; line-height: 1.5; color: var(--sub); margin: 0; }
-
   .foot { margin-top: 30px; font-size: 12px; color: var(--sub); line-height: 1.5; max-width: 70ch; }
   .foot code { font-family: var(--font-mono); font-size: 11px; background: var(--soft); padding: 1px 5px; border-radius: 4px; }
 
@@ -141,7 +138,7 @@
         <h1>Steering a frozen policy with a velocity-space residual</h1>
         <p class="lede">Drag <strong>γ</strong> to set the steering strength. The residual
           γ·(v<sub>task</sub>&nbsp;−&nbsp;v<sub>ref</sub>) slides the sampler's target from the base
-          prior toward the task mode. Success peaks where the paper reports it.</p>
+          prior toward the task mode.</p>
       </div>
       <div class="toggle" role="tablist" aria-label="Visual direction">
         <button id="ta" class="on" onclick="setDir('a')">Direction A<span class="tlabel">site / cream</span></button>
@@ -154,82 +151,135 @@
         <div class="fieldwrap">
           <canvas id="field"></canvas>
         </div>
-        <div class="side">
-          <div class="eq">
-            <span class="pps"><i>v</i><sub>PPS</sub></span> = <span class="b"><i>v</i><sub>base</sub></span> +
-            <span class="g" id="eqg">0.50</span> · [ <span class="t"><i>v</i><sub>task</sub></span> − <span class="r"><i>v</i><sub>ref</sub></span> ]
-          </div>
-          <div>
-            <div class="ctl-label"><span class="k">Steering strength γ</span><span class="v" id="gval">0.50</span></div>
-            <input id="gamma" type="range" min="0" max="1.0" step="0.01" value="0.5" />
-            <div class="ticks"><span>0 · base</span><span>0.5 · PPS</span><span>1 · task</span></div>
-          </div>
-          <div class="btns">
-            <button id="play" onclick="togglePlay()">❚❚ Pause</button>
-            <button onclick="resetGamma()">Reset γ</button>
-          </div>
-          <div class="curvewrap">
-            <div class="curve-title"><span>Success rate vs γ</span><span id="srate">80%</span></div>
-            <canvas id="curve"></canvas>
-          </div>
-          <div class="verdict">
-            <span class="dot" id="vdot"></span>
-            <div><p class="vh" id="vh">Steers into the task mode</p>
-              <p class="vp" id="vp">The residual is strong enough to reach task behaviour while the base prior keeps the sampler robust.</p></div>
-          </div>
+        <div class="teaserwrap">
+          <img id="teaserBg" src="../images/teaser_1_3.png" alt="Robot demonstrating jeans-folding with three rollouts; a green PPS rollout is overlaid">
+          <canvas class="teaser-overlay" id="teaserOverlay"></canvas>
         </div>
       </div>
     </div>
 
-    <p class="foot">Proof-of-concept module. The 2D field is a faithful schematic of Eq. (4) with v<sub>ref</sub>&nbsp;≈&nbsp;v<sub>base</sub>; the success curve is traced from Fig. 4a (peak at γ = 0.4). Set your page's typeface once via <code>--font-original</code>. To make it data-exact I'll ingest your stored per-step <code>x_k</code>, <code>v_base</code>, <code>v_ref</code>, <code>v_task</code> for the three models.</p>
+    <div class="below">
+      <div class="eq">
+        <span class="pps"><i>v</i><sub>PPS</sub></span> = <span class="b"><i>v</i><sub>base</sub></span> +
+        <span class="g" id="eqg">0.50</span> · [ <span class="t"><i>v</i><sub>task</sub></span> − <span class="r"><i>v</i><sub>ref</sub></span> ]
+      </div>
+      <div>
+        <div class="ctl-label"><span class="k">Steering strength γ</span><span class="v" id="gval">0.50</span></div>
+        <input id="gamma" type="range" min="0" max="1.0" step="0.01" value="0.5" />
+        <div class="ticks"><span>0 · base</span><span>0.5 · PPS</span><span>1 · task</span></div>
+      </div>
+    </div>
+
+    <p class="foot">Proof-of-concept module. The 2D field is a faithful schematic of Eq. (4) with v<sub>ref</sub>&nbsp;≈&nbsp;v<sub>base</sub>; the green overlay morphs a flow-matching rollout from the purple (base) trajectory toward the blue (task) endpoint as γ grows.</p>
   </div>
 
   <script src="pps-embed.js"></script>
   <script src="pps-diagram_new.js"></script>
   <script>
+    // The diagram class still draws onto a "curve" canvas; we pass a
+    // throwaway 1×1 offscreen canvas so the success-rate plot renders
+    // somewhere harmless without touching the upstream class.
+    var sinkCurve = document.createElement('canvas');
+    sinkCurve.width = 1; sinkCurve.height = 1;
+
     var diag = new window.PPSDiagramNew({
       field: document.getElementById('field'),
-      curve: document.getElementById('curve')
+      curve: sinkCurve
     });
     var gammaEl = document.getElementById('gamma');
     function fmt(g){ return g.toFixed(2); }
 
-    // Single combined view: one denoising path noise → action plus the
-    // velocity-decomposition inset. No quiver field, no action cloud.
+    /* ----- Teaser overlay (right pane) -------------------------------
+       Anchor points in NORMALISED image coordinates [0,1]. The image
+       gets responsively sized via CSS; the canvas tracks it via the
+       same mapping. Edit any of these to retune. */
+    var T_START      = { x: 0.575, y: 0.230 };
+    var T_END_PURPLE = { x: 0.580, y: 0.640 };
+    var T_END_BLUE   = { x: 0.715, y: 0.510 };
+    var T_CP_PURPLE  = { x: 0.585, y: 0.460 };
+    // CP at γ=1: placed so the bezier's tangent at T_END_BLUE makes a
+    // 20° angle with the rightward direction (going up-and-to-the-right
+    // in canvas coords). r controls the bow magnitude.
+    var T_R = 0.18;
+    var T_CP_BLUE = {
+      x: T_END_BLUE.x - T_R *  0.9397,    // cos(-20°)
+      y: T_END_BLUE.y - T_R * -0.3420     // sin(-20°)
+    };
 
-    function updateVerdict(g){
-      var s = window.PPS_successAt(g);
-      document.getElementById('srate').textContent = Math.round(s*100) + '%';
-      var dot = document.getElementById('vdot'), vh = document.getElementById('vh'), vp = document.getElementById('vp');
-      var cs = getComputedStyle(document.body);
-      if (g < 0.25) { dot.style.background = cs.getPropertyValue('--bad');
-        vh.textContent = 'Collapses to the base prior';
-        vp.textContent = 'Too little steering: the sampler stays in the frozen base mode and the OOD task is rarely solved.';
-      } else if (g <= 0.62) { dot.style.background = cs.getPropertyValue('--good');
-        vh.textContent = 'Steers into the task mode';
-        vp.textContent = 'The residual reaches task behaviour while the base prior keeps the sampler robust. This is the peak.';
-      } else if (g <= 0.85) { dot.style.background = cs.getPropertyValue('--warn');
-        vh.textContent = 'Over-steering, success declining';
-        vp.textContent = 'Past the peak the residual pushes too hard and base robustness starts to erode.';
-      } else { dot.style.background = cs.getPropertyValue('--bad');
-        vh.textContent = 'Overshoots the task mode';
-        vp.textContent = 'The sampler trusts the proxy too much, overshoots, and falls back toward base-level success.';
-      }
+    var teaserBg  = document.getElementById('teaserBg');
+    var teaserCv  = document.getElementById('teaserOverlay');
+    var teaserCtx = teaserCv.getContext('2d');
+
+    function sizeTeaserCanvas() {
+      var dpr = window.devicePixelRatio || 1;
+      var r = teaserCv.getBoundingClientRect();
+      teaserCv.width  = Math.max(1, Math.round(r.width  * dpr));
+      teaserCv.height = Math.max(1, Math.round(r.height * dpr));
     }
-    gammaEl.addEventListener('input', function(){
-      var g = parseFloat(this.value); diag.gamma = g;
+    function lerp(a, b, t) { return a + (b - a) * t; }
+
+    function drawTeaser(g) {
+      var dpr = window.devicePixelRatio || 1;
+      var w = teaserCv.width, h = teaserCv.height;
+      teaserCtx.setTransform(1, 0, 0, 1, 0, 0);
+      teaserCtx.clearRect(0, 0, w, h);
+
+      var sx = T_START.x * w, sy = T_START.y * h;
+      var ex = lerp(T_END_PURPLE.x, T_END_BLUE.x, g) * w;
+      var ey = lerp(T_END_PURPLE.y, T_END_BLUE.y, g) * h;
+      var cx = lerp(T_CP_PURPLE.x,  T_CP_BLUE.x,  g) * w;
+      var cy = lerp(T_CP_PURPLE.y,  T_CP_BLUE.y,  g) * h;
+
+      teaserCtx.lineCap = 'round';
+      teaserCtx.lineJoin = 'round';
+
+      // Soft dark outline (mirrors the outline-look of the existing purple/blue/orange paths).
+      teaserCtx.beginPath();
+      teaserCtx.moveTo(sx, sy);
+      teaserCtx.quadraticCurveTo(cx, cy, ex, ey);
+      teaserCtx.lineWidth = 22 * dpr;
+      teaserCtx.strokeStyle = 'rgba(20, 20, 20, 0.55)';
+      teaserCtx.stroke();
+
+      // Green stroke on top.
+      teaserCtx.beginPath();
+      teaserCtx.moveTo(sx, sy);
+      teaserCtx.quadraticCurveTo(cx, cy, ex, ey);
+      teaserCtx.lineWidth = 16 * dpr;
+      teaserCtx.strokeStyle = '#4f9d5d';
+      teaserCtx.stroke();
+
+      // End dot.
+      teaserCtx.beginPath();
+      teaserCtx.arc(ex, ey, 11 * dpr, 0, Math.PI * 2);
+      teaserCtx.fillStyle = '#4f9d5d';
+      teaserCtx.fill();
+      teaserCtx.lineWidth = 2.5 * dpr;
+      teaserCtx.strokeStyle = 'rgba(20, 20, 20, 0.55)';
+      teaserCtx.stroke();
+    }
+
+    function syncTeaser() {
+      drawTeaser(parseFloat(gammaEl.value));
+    }
+    if (teaserBg.complete) { sizeTeaserCanvas(); syncTeaser(); }
+    else teaserBg.addEventListener('load', function () { sizeTeaserCanvas(); syncTeaser(); });
+    window.addEventListener('resize', function () { sizeTeaserCanvas(); syncTeaser(); });
+
+    /* ----- Slider drives BOTH the diagram and the teaser overlay ----- */
+    gammaEl.addEventListener('input', function () {
+      var g = parseFloat(this.value);
+      diag.gamma = g;
       document.getElementById('gval').textContent = fmt(g);
       document.getElementById('eqg').textContent = fmt(g);
-      updateVerdict(g);
+      syncTeaser();
     });
-    function togglePlay(){ diag.playing = !diag.playing;
-      document.getElementById('play').textContent = diag.playing ? '❚❚ Pause' : '►  Play'; }
-    function resetGamma(){ gammaEl.value = 0.5; gammaEl.dispatchEvent(new Event('input')); }
-    function setDir(d){ document.body.setAttribute('data-theme', d); diag.theme = d;
+
+    function setDir(d) {
+      document.body.setAttribute('data-theme', d); diag.theme = d;
       document.getElementById('ta').classList.toggle('on', d==='a');
       document.getElementById('tb').classList.toggle('on', d==='b');
-      updateVerdict(parseFloat(gammaEl.value)); }
-    updateVerdict(0.5);
+    }
   </script>
 </body>
 </html>
