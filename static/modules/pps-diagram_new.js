@@ -155,9 +155,16 @@
 
   // ---- primitives ---------------------------------------------------------
   function arrow(ctx, a, b, color, width, head) {
-    ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = width; ctx.lineCap = 'round';
-    ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
-    var ang = Math.atan2(b.y - a.y, b.x - a.x), hs = head || 8;
+    var ang = Math.atan2(b.y - a.y, b.x - a.x);
+    var hs = head || 8;
+    // Stop the shaft at the back-of-triangle (b − hs·cos(0.42)·dir ≈ b − 0.913·hs·dir)
+    // and use a butt cap so the line ends flush against the head's base — no
+    // rounded bulge poking past the tip, no shaft/triangle overlap seam.
+    var back = hs * Math.cos(0.42);
+    var endX = b.x - back * Math.cos(ang);
+    var endY = b.y - back * Math.sin(ang);
+    ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = width; ctx.lineCap = 'butt';
+    ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(endX, endY); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(b.x, b.y);
     ctx.lineTo(b.x - hs * Math.cos(ang - 0.42), b.y - hs * Math.sin(ang - 0.42));
     ctx.lineTo(b.x - hs * Math.cos(ang + 0.42), b.y - hs * Math.sin(ang + 0.42));
