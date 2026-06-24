@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teaser steering overlay</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      background: #fdfaf4;
+      font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+      color: #1b1b1b;
+    }
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 20px 16px 24px;
+    }
+    .frame {
+      position: relative;
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      line-height: 0;
+    }
+    .frame img {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: 10px;
+    }
+    .frame canvas.overlay {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      border-radius: 10px;
+    }
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-top: 14px;
+    }
+    .controls .label {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 13px;
+      color: #6b6453;
+    }
+    .controls input[type=range] {
+      flex: 1 1 auto;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 4px;
+      background: #e4dcc8;
+      border-radius: 99px;
+      outline: none;
+    }
+    .controls input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: #4f9d5d;
+      border: 2.5px solid #fffdf8;
+      cursor: pointer;
+      box-shadow: 0 1px 2px rgba(40,32,16,0.15);
+    }
+    .controls input[type=range]::-moz-range-thumb {
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: #4f9d5d;
+      border: 2.5px solid #fffdf8;
+      cursor: pointer;
+    }
+    .controls .val {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 13px;
+      color: #4f9d5d;
+      font-weight: 500;
+      min-width: 38px;
+      text-align: right;
+    }
+    .controls button {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: #1b1b1b;
+      background: #fffdf8;
+      border: 1px solid #e4dcc8;
+      border-radius: 8px;
+      padding: 7px 14px;
+      cursor: pointer;
+    }
+    .controls button:hover {
+      background: #efece4;
+    }
+
+    html.pps-embedded, body.embed { background: transparent; }
+    body.embed .wrap { padding: 0; max-width: none; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="frame">
+      <img id="bg" src="../images/teaser_1_3.png" alt="Robot demonstrating jeans-folding with three rollouts">
+      <canvas class="overlay" id="overlay"></canvas>
+    </div>
+    <div class="controls">
+      <span class="label">γ</span>
+      <input id="g" type="range" min="0" max="1" step="0.005" value="0">
+      <span class="val" id="gv">0.00</span>
+      <button id="play">▶ Play</button>
+    </div>
+  </div>
+
+  <script>
+    // Position controls in NORMALIZED image coordinates [0,1]. The image
+    // gets responsively sized in CSS; the canvas matches via the same
+    // normalised mapping so the trajectory tracks the image regardless of
+    // display width. Edit any of these to retune.
+    var START      = { x: 0.575, y: 0.230 };  // top of purple/blue start area
+    var END_PURPLE = { x: 0.580, y: 0.640 };  // tip of purple trajectory
+    var END_BLUE   = { x: 0.715, y: 0.510 };  // tip of blue trajectory
+    var CP_PURPLE  = { x: 0.585, y: 0.460 };  // bezier control at γ=0 (matches purple)
+    // CP at γ=1: positioned so the green path's tangent at END_BLUE makes
+    // a 20° angle with the rightward direction (going up-and-to-the-right).
+    // tangent direction = (cos(-20°), sin(-20°)) = (0.940, -0.342) in canvas
+    // coords (y down). CP = END - r·tangent, r picked for a graceful arc.
+    var R20 = 0.18;  // bow magnitude at γ=1
+    var CP_BLUE = {
+      x: END_BLUE.x - R20 *  0.9397,
+      y: END_BLUE.y - R20 * -0.3420
+    };
+
+    var canvas = document.getElementById('overlay');
+    var ctx    = canvas.getContext('2d');
+    var img    = document.getElementById('bg');
+    var slider = document.getElementById('g');
+    var gv     = document.getElementById('gv');
+    var playBtn = document.getElementById('play');
+
+    function lerp(a, b, t) { return a + (b - a) * t; }
+    function ease(t) { return t * t * (3 - 2 * t); } // smoothstep
+
+    // Match canvas backing size to its rendered CSS size at devicePixelRatio.
+    function sizeCanvas() {
+      var dpr = window.devicePixelRatio || 1;
+      var r = canvas.getBoundingClientRect();
+      canvas.width  = Math.max(1, Math.round(r.width  * dpr));
+      canvas.height = Math.max(1, Math.round(r.height * dpr));
+    }
+
+    function draw(g) {
+      var dpr = window.devicePixelRatio || 1;
+      var w = canvas.width, h = canvas.height;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, w, h);
+
+      // Compose bezier endpoints + control point in pixel space.
+      var sx = START.x * w, sy = START.y * h;
+      var ex = lerp(END_PURPLE.x, END_BLUE.x, g) * w;
+      var ey = lerp(END_PURPLE.y, END_BLUE.y, g) * h;
+      var cx = lerp(CP_PURPLE.x,  CP_BLUE.x,  g) * w;
+      var cy = lerp(CP_PURPLE.y,  CP_BLUE.y,  g) * h;
+
+      // Thin dark outline first, then the green stroke on top —
+      // mimics the outlined look of the existing purple/blue/orange paths.
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      ctx.beginPath();
+      ctx.moveTo(sx, sy);
+      ctx.quadraticCurveTo(cx, cy, ex, ey);
+      ctx.lineWidth = 22 * dpr;
+      ctx.strokeStyle = 'rgba(20, 20, 20, 0.55)';
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(sx, sy);
+      ctx.quadraticCurveTo(cx, cy, ex, ey);
+      ctx.lineWidth = 16 * dpr;
+      ctx.strokeStyle = '#4f9d5d';
+      ctx.stroke();
+
+      // Small head dot at the end.
+      ctx.beginPath();
+      ctx.arc(ex, ey, 11 * dpr, 0, Math.PI * 2);
+      ctx.fillStyle = '#4f9d5d';
+      ctx.fill();
+      ctx.lineWidth = 2.5 * dpr;
+      ctx.strokeStyle = 'rgba(20, 20, 20, 0.55)';
+      ctx.stroke();
+    }
+
+    function render(g) {
+      gv.textContent = g.toFixed(2);
+      draw(g);
+    }
+
+    // ---- Slider ----
+    slider.addEventListener('input', function () {
+      stopAuto();
+      render(parseFloat(this.value));
+    });
+
+    // ---- Auto-play (ping-pong) ----
+    var playing = false, rafId = null, last = null, phase = 0;
+    function tick(ts) {
+      if (last == null) last = ts;
+      var dt = Math.min(0.05, (ts - last) / 1000);
+      last = ts;
+      // 4-second period (2s out, 2s back) — ping-pong via sin envelope.
+      phase += dt * (Math.PI / 2.0);  // 4-second full cycle
+      var g = ease((Math.sin(phase) + 1) / 2);
+      slider.value = g;
+      render(g);
+      if (playing) rafId = requestAnimationFrame(tick);
+    }
+    function startAuto() {
+      if (playing) return;
+      playing = true;
+      last = null;
+      playBtn.textContent = '❚❚ Pause';
+      rafId = requestAnimationFrame(tick);
+    }
+    function stopAuto() {
+      if (!playing) return;
+      playing = false;
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = null;
+      playBtn.textContent = '▶ Play';
+    }
+    playBtn.addEventListener('click', function () {
+      playing ? stopAuto() : startAuto();
+    });
+
+    // ---- Boot ----
+    function boot() {
+      sizeCanvas();
+      render(parseFloat(slider.value));
+    }
+    if (img.complete) boot();
+    else img.addEventListener('load', boot);
+    window.addEventListener('resize', function () {
+      sizeCanvas();
+      render(parseFloat(slider.value));
+    });
+  </script>
+</body>
+</html>
