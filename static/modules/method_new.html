@@ -153,8 +153,6 @@
       <div class="grid">
         <div class="fieldwrap">
           <canvas id="field"></canvas>
-          <div class="badge">action space · 2D projection</div>
-          <div class="vhint" id="vhint"></div>
         </div>
         <div class="side">
           <div class="eq">
@@ -183,15 +181,6 @@
       </div>
     </div>
 
-    <div class="caption">
-      <div class="c"><p class="n">γ = 0</p><h3>Frozen base</h3>
-        <p>The residual vanishes. The sampler stays at the base prior, which never solves an out-of-distribution task.</p></div>
-      <div class="c"><p class="n">γ ≈ 0.5</p><h3>Calibrated steering</h3>
-        <p>v<sub>task</sub> − v<sub>ref</sub> isolates the task change and tilts the sampler into the demonstrated mode while keeping base priors.</p></div>
-      <div class="c"><p class="n">γ &gt; 1</p><h3>Overshoot</h3>
-        <p>Over-trusting the proxy overshoots the task mode and discards base robustness. Success falls back off.</p></div>
-    </div>
-
     <p class="foot">Proof-of-concept module. The 2D field is a faithful schematic of Eq. (4) with v<sub>ref</sub>&nbsp;≈&nbsp;v<sub>base</sub>; the success curve is traced from Fig. 4a (peak at γ = 0.4). Set your page's typeface once via <code>--font-original</code>. To make it data-exact I'll ingest your stored per-step <code>x_k</code>, <code>v_base</code>, <code>v_ref</code>, <code>v_task</code> for the three models.</p>
   </div>
 
@@ -207,7 +196,6 @@
 
     // Single combined view: one denoising path noise → action plus the
     // velocity-decomposition inset. No quiver field, no action cloud.
-    var COMBO_HINT = 'A single denoising rollout, noise → action, steered toward L(γ). The inset decomposes the velocity into v_base + γ·(v_task − v_ref).';
 
     function updateVerdict(g){
       var s = window.PPS_successAt(g);
@@ -241,7 +229,6 @@
       document.getElementById('ta').classList.toggle('on', d==='a');
       document.getElementById('tb').classList.toggle('on', d==='b');
       updateVerdict(parseFloat(gammaEl.value)); }
-    document.getElementById('vhint').textContent = COMBO_HINT;
     updateVerdict(0.5);
   </script>
 </body>
