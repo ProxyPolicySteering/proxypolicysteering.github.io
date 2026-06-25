@@ -169,8 +169,40 @@
           padding: 7.5%;
           line-height: 0;
           position: relative;
+          z-index: 0;          /* establish a stacking context for the focus mask + arrow z-index */
           box-shadow: 0 6px 14px rgba(40, 32, 16, 0.10);
           transition: box-shadow 0.25s ease;
+        }
+        /* Focus-state mask: hovering a distribution or its top equation cell
+           drops a semi-transparent white veil over EVERY distribution
+           container's plot + π_* caption. The SVG arrows ride above the
+           mask (z-index 2), so they stay visible while the rest fades. */
+        .tih-dist::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: rgba(255, 255, 255, 0.65);
+          border-radius: 12px;
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity 0.22s ease;
+          z-index: 1;
+        }
+        .tih.focused .tih-dist::before { opacity: 1; }
+        /* Float-up styling on the focused arrows: thicker stroke + drop
+           shadow so they pop above the mask. Transitions on path attrs are
+           expensive in some browsers — only animate the filter. */
+        .tih-dist-arrow { z-index: 2; }
+        .tih-dist-arrow path { transition: stroke-width 0.22s ease, filter 0.22s ease; }
+        .tih.focus-base .tih-dist.k-base .tih-dist-arrow path,
+        .tih.focus-base .tih-dist-arrow.pps .pps-base,
+        .tih.focus-ref  .tih-dist.k-ref  .tih-dist-arrow path,
+        .tih.focus-ref  .tih-dist-arrow.pps .pps-ref,
+        .tih.focus-task .tih-dist.k-task .tih-dist-arrow path,
+        .tih.focus-task .tih-dist-arrow.pps .pps-task,
+        .tih.focus-pps  .tih-dist-arrow.pps path {
+          stroke-width: 14;
+          filter: drop-shadow(0 4px 6px rgba(20, 16, 8, 0.30));
         }
         .tih-dist img {
           display: block;
@@ -396,7 +428,7 @@
           <div class="tih-eq-cell pps">&nabla;<sub><i>a</i></sub> log <i>&pi;</i><sub>PPS</sub></div>
         </div>
         <div class="tih-row dist">
-          <div class="tih-dist">
+          <div class="tih-dist k-base">
             <div class="tih-dist-frame">
               <img data-kind="base" src="./static/teaser_web/fm_base_1.png" alt="base distribution">
               <svg class="tih-dist-arrow base" viewBox="0 0 675 777" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><path d=""/></svg>
@@ -407,7 +439,7 @@
             <span class="lbl">Distill</span>
             <svg viewBox="0 0 34 12" xmlns="http://www.w3.org/2000/svg"><path d="M0 6 L34 6 M28 1 L34 6 L28 11" stroke="currentColor" stroke-width="2.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </div>
-          <div class="tih-dist">
+          <div class="tih-dist k-ref">
             <div class="tih-dist-frame">
               <img data-kind="ref" src="./static/teaser_web/fm_ref_1.png" alt="ref distribution">
               <svg class="tih-dist-arrow ref" viewBox="0 0 675 777" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><path d=""/></svg>
@@ -418,7 +450,7 @@
             <span class="lbl">Finetune</span>
             <svg viewBox="0 0 34 12" xmlns="http://www.w3.org/2000/svg"><path d="M0 6 L34 6 M28 1 L34 6 L28 11" stroke="currentColor" stroke-width="2.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </div>
-          <div class="tih-dist">
+          <div class="tih-dist k-task">
             <div class="tih-dist-frame">
               <img data-kind="task" src="./static/teaser_web/fm_task_1.png" alt="task distribution">
               <svg class="tih-dist-arrow task" viewBox="0 0 675 777" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><path d=""/></svg>
@@ -426,7 +458,7 @@
             <div class="tih-dist-caption task"><i>&pi;</i><sub>task</sub></div>
           </div>
           <div class="tih-arrow tih-arrow-empty" aria-hidden="true"></div>
-          <div class="tih-dist">
+          <div class="tih-dist k-pps">
             <div class="tih-dist-frame">
               <img data-kind="pps" src="./static/teaser_web/fm_pps_1.png" alt="pps distribution">
               <svg class="tih-dist-arrow pps" viewBox="0 0 675 777" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
@@ -588,6 +620,31 @@
         // and never removed. Hovering another image just swaps which
         // panel is active; there is no non-floating state.
         root.classList.add('hovering');
+
+        // Focus state: hovering a single distribution container OR its
+        // π_* equation cell at top drops the mask over EVERY container's
+        // plot+caption and floats the matching arrow (plus the same-coloured
+        // sub-arrow on the PPS panel) above the veil.
+        var FOCUS_KINDS = ['base', 'ref', 'task', 'pps'];
+        function setFocus(kind) {
+          FOCUS_KINDS.forEach(function (k) { root.classList.remove('focus-' + k); });
+          if (kind) {
+            root.classList.add('focused');
+            root.classList.add('focus-' + kind);
+          } else {
+            root.classList.remove('focused');
+          }
+        }
+        FOCUS_KINDS.forEach(function (kind) {
+          var dist = root.querySelector('.tih-dist.k-' + kind);
+          if (dist) dist.addEventListener('mouseenter', function () { setFocus(kind); });
+          var eq = root.querySelector('.tih-eq-cell.' + kind);
+          if (eq) eq.addEventListener('mouseenter', function () { setFocus(kind); });
+        });
+        // Clear focus only on leaving the whole block — sliding between two
+        // distributions keeps the mask up so the transition is seamless.
+        root.addEventListener('mouseleave', function () { setFocus(null); });
+
         // Default state shown on load: variant 1 + action 1 active.
         activate(1);
       })();
