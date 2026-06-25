@@ -176,6 +176,22 @@
           height: auto;
           background: transparent;
         }
+        /* Frame wraps the image + SVG arrow overlay so the velocity-prediction
+           arrow lands on the image, not the caption underneath. */
+        .tih-dist-frame { position: relative; line-height: 0; }
+        .tih-dist-arrow {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          pointer-events: none;
+          overflow: visible;     /* let stroke caps + arrow head extend a hair beyond bounds */
+        }
+        .tih-dist-arrow path { fill: none; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+        .tih-dist-arrow.base path { stroke: #AF56BF; }
+        .tih-dist-arrow.ref  path { stroke: #F58A45; }
+        .tih-dist-arrow.task path { stroke: #407CB6; }
+        .tih-dist-arrow.pps  path { stroke: #55A86E; }
         /* Caption below each distribution (π_base, π_ref, π_task, π_PPS)
            — same colour as the corresponding equation term up top. */
         .tih-dist-caption {
@@ -374,7 +390,10 @@
         </div>
         <div class="tih-row dist">
           <div class="tih-dist">
-            <img data-kind="base" src="./static/teaser_web/fm_base_1.png" alt="base distribution">
+            <div class="tih-dist-frame">
+              <img data-kind="base" src="./static/teaser_web/fm_base_1.png" alt="base distribution">
+              <svg class="tih-dist-arrow base" viewBox="0 0 675 777" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><path d=""/></svg>
+            </div>
             <div class="tih-dist-caption base"><i>&pi;</i><sub>base</sub></div>
           </div>
           <div class="tih-arrow">
@@ -382,7 +401,10 @@
             <svg viewBox="0 0 34 12" xmlns="http://www.w3.org/2000/svg"><path d="M0 6 L34 6 M28 1 L34 6 L28 11" stroke="currentColor" stroke-width="2.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </div>
           <div class="tih-dist">
-            <img data-kind="ref" src="./static/teaser_web/fm_ref_1.png" alt="ref distribution">
+            <div class="tih-dist-frame">
+              <img data-kind="ref" src="./static/teaser_web/fm_ref_1.png" alt="ref distribution">
+              <svg class="tih-dist-arrow ref" viewBox="0 0 675 777" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><path d=""/></svg>
+            </div>
             <div class="tih-dist-caption ref"><i>&pi;</i><sub>ref</sub></div>
           </div>
           <div class="tih-arrow">
@@ -390,12 +412,18 @@
             <svg viewBox="0 0 34 12" xmlns="http://www.w3.org/2000/svg"><path d="M0 6 L34 6 M28 1 L34 6 L28 11" stroke="currentColor" stroke-width="2.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </div>
           <div class="tih-dist">
-            <img data-kind="task" src="./static/teaser_web/fm_task_1.png" alt="task distribution">
+            <div class="tih-dist-frame">
+              <img data-kind="task" src="./static/teaser_web/fm_task_1.png" alt="task distribution">
+              <svg class="tih-dist-arrow task" viewBox="0 0 675 777" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><path d=""/></svg>
+            </div>
             <div class="tih-dist-caption task"><i>&pi;</i><sub>task</sub></div>
           </div>
           <div class="tih-arrow tih-arrow-empty" aria-hidden="true"></div>
           <div class="tih-dist">
-            <img data-kind="pps" src="./static/teaser_web/fm_pps_1.png" alt="pps distribution">
+            <div class="tih-dist-frame">
+              <img data-kind="pps" src="./static/teaser_web/fm_pps_1.png" alt="pps distribution">
+              <svg class="tih-dist-arrow pps" viewBox="0 0 675 777" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><path d=""/></svg>
+            </div>
             <div class="tih-dist-caption pps"><i>&pi;</i><sub>PPS</sub></div>
           </div>
         </div>
@@ -441,12 +469,85 @@
           dists.forEach(function (img) {
             img.src = './static/teaser_web/fm_' + img.dataset.kind + '_' + i + '.png';
           });
+          updateArrows(i);
         }
         acts.forEach(function (a) {
           a.addEventListener('mouseenter', function () {
             activate(+a.dataset.i);
           });
         });
+
+        // ----- Velocity-prediction arrows on each distribution image -----
+        //
+        // Each fm_*_<variant>.png is rendered by plot_flow_matching_<v>.py
+        // (in static/teaser_web/) — the script draws one middle-index path
+        // from PATH_STARTS[1]=(-2.5, 0.15) to its mode's `ends[1]`, with a
+        // sin-perturbed offset. We re-evaluate that same path here, find
+        // the point on it where the image's vertical centre crosses
+        // (image_y_norm = 0.5 ↔ matplotlib mx = 0.18), and draw an arrow
+        // there in the tangent direction. The image is rendered after a
+        // 90° CW rotation so a mat-space tangent (dmx, dmy) corresponds
+        // to an image-space direction (dmy, dmx) under uniform scaling.
+        var PATH_DATA = {
+          base: [
+            { end_x: 2.5,  end_y: -1.3,  offset: -0.5 },
+            { end_x: 2.5,  end_y:  1.3,  offset:  0.5 },
+            { end_x: 2.6,  end_y: -1.5,  offset: -0.5 }
+          ],
+          ref: [
+            { end_x: 2.5,  end_y: -1.2,  offset: -0.5 },
+            { end_x: 2.5,  end_y: -1.2,  offset: -0.5 },
+            { end_x: 2.9,  end_y: -1.2,  offset: -0.5 }
+          ],
+          task: [
+            { end_x: 3.0,  end_y:  2.3,  offset: -0.5 },
+            { end_x: 3.0,  end_y: -2.3,  offset:  0.5 },
+            { end_x: 2.7,  end_y: -1.3,  offset: -0.5 }
+          ],
+          pps: [
+            { end_x: 2.6,  end_y:  1.8,  offset: -0.5 },
+            { end_x: 2.55, end_y:  1.55, offset:  0.5 },
+            { end_x: 2.6,  end_y: -1.6,  offset: -0.5 }
+          ]
+        };
+        var IMG_W = 675, IMG_H = 777;     // matches fm_*.png aspect (and the SVG viewBox above)
+        var ARROW_LEN = 110;              // shaft length in viewBox units
+        var HEAD_SIZE = 32;               // arrowhead size in viewBox units
+        var HEAD_ANGLE = 0.42;            // ~24°, opens the chevron
+        function computeArrow(kind, variantIdx) {
+          var d = PATH_DATA[kind][variantIdx - 1];
+          var t = 2.68 / (d.end_x + 2.5);                       // mx = -2.5 + t(end_x+2.5) = 0.18
+          var my = (1 - t) * 0.15 + t * d.end_y + d.offset * Math.sin(Math.PI * t);
+          var dmx = d.end_x + 2.5;                              // ∂x/∂t
+          var dmy = (d.end_y - 0.15) + d.offset * Math.PI * Math.cos(Math.PI * t); // ∂y/∂t
+          // 90°-CW image rotation: (dmx, dmy) in mat → (dmy, dmx) in image with uniform pixel scaling.
+          var pdx = dmy, pdy = dmx;
+          var mag = Math.sqrt(pdx * pdx + pdy * pdy) || 1;
+          var ux = pdx / mag, uy = pdy / mag;
+          // start = ((my + 4.28)/9.0, 0.5) in normalised image coords
+          var sx = ((my + 4.28) / 9.0) * IMG_W;
+          var sy = 0.5 * IMG_H;
+          var tx = sx + ARROW_LEN * ux;
+          var ty = sy + ARROW_LEN * uy;
+          var c = Math.cos(HEAD_ANGLE), s = Math.sin(HEAD_ANGLE);
+          // arrowhead vertices: tip - HEAD_SIZE · (direction rotated ±HEAD_ANGLE)
+          var v1x = tx - HEAD_SIZE * (ux * c - uy * s);
+          var v1y = ty - HEAD_SIZE * (ux * s + uy * c);
+          var v2x = tx - HEAD_SIZE * (ux * c + uy * s);
+          var v2y = ty - HEAD_SIZE * (-ux * s + uy * c);
+          return 'M' + sx.toFixed(1) + ' ' + sy.toFixed(1) +
+                 ' L' + tx.toFixed(1) + ' ' + ty.toFixed(1) +
+                 ' M' + v1x.toFixed(1) + ' ' + v1y.toFixed(1) +
+                 ' L' + tx.toFixed(1) + ' ' + ty.toFixed(1) +
+                 ' L' + v2x.toFixed(1) + ' ' + v2y.toFixed(1);
+        }
+        function updateArrows(i) {
+          ['base', 'ref', 'task', 'pps'].forEach(function (kind) {
+            var p = root.querySelector('.tih-dist-arrow.' + kind + ' path');
+            if (p) p.setAttribute('d', computeArrow(kind, i));
+          });
+        }
+
         // The .hovering "floating" state is permanent — applied on init
         // and never removed. Hovering another image just swaps which
         // panel is active; there is no non-floating state.
