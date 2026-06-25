@@ -413,13 +413,17 @@
           transform: translateY(-7px);
           box-shadow: 0 16px 30px rgba(40, 32, 16, 0.22);
         }
-        /* Focus state (cursor on the dist row): the equation strip lifts a
-           further 6 px so the whole first row visibly floats together with
-           the arrow-pop happening in the second row. */
+        /* Focus state (cursor on the dist row):
+           - First row (eq strip) lifts a further 6 px so it visibly floats.
+           - Second row (dist containers) DROPS back to its resting position
+             and resting shadow. The arrow-pop + white veil on the plots
+             carry the focus instead of an extra lift on the containers. */
         .tih.focused .tih-eq {
           transform: translateY(-12px);
           box-shadow: 0 18px 32px rgba(40, 32, 16, 0.22);
         }
+        .tih.focused .tih-row.dist { transform: translateY(0); }
+        .tih.focused .tih-dist { box-shadow: 0 6px 14px rgba(40, 32, 16, 0.10); }
 
         /* 70%-opacity white mask over OTHER action images while in the
            floating state. The pseudo-element rides the image frame so it
