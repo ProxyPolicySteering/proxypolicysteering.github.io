@@ -187,6 +187,7 @@
           width: 100%;
           height: auto;
           background: transparent;
+          opacity: 0.85;            /* 15 % transparent so the SVG arrows pop */
         }
         /* Frame wraps the image + SVG arrow overlay so the velocity-prediction
            arrow lands on the image, not the caption underneath. */
@@ -322,9 +323,25 @@
           border-radius: 0; /* frame handles rounding */
           cursor: pointer;
           filter: saturate(0.85) brightness(0.97);
-          transition: filter 0.25s ease;
+          transition: filter 0.25s ease, opacity 0.18s ease;
         }
         .tih-act.active .tih-act-frame img { filter: none; }
+        /* Per-action rollout video — same crop as the still (1100×594) so the
+           swap is seamless. Sits over the image, opacity 0 by default,
+           pointer-events: none so clicks fall through to the still/banner. */
+        .tih-act-video {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity 0.18s ease;
+        }
+        .tih-act-frame.video-on .tih-act-video { opacity: 1; }
+        .tih-act-frame.video-on img { opacity: 0; }
         .tih-act-banner {
           position: absolute;
           left: 0; right: 0; bottom: 0;
@@ -452,6 +469,7 @@
           <div class="tih-act active" data-i="1">
             <div class="tih-act-frame">
               <img src="./static/teaser_web/teaser_1_final_action.jpg" alt="rollout 1">
+              <video class="tih-act-video" src="./static/teaser_web/1_web.mp4" muted loop playsinline preload="metadata"></video>
               <div class="tih-act-banner">Novel task behavior</div>
             </div>
             <div class="tih-act-caption">State within task demonstrations</div>
@@ -459,6 +477,7 @@
           <div class="tih-act" data-i="2">
             <div class="tih-act-frame">
               <img src="./static/teaser_web/teaser_2_final_action.jpg" alt="rollout 2">
+              <video class="tih-act-video" src="./static/teaser_web/2_web.mp4" muted loop playsinline preload="metadata"></video>
               <div class="tih-act-banner">Recovery via base prior</div>
             </div>
             <div class="tih-act-caption">State outside task demonstrations</div>
@@ -466,6 +485,7 @@
           <div class="tih-act" data-i="3">
             <div class="tih-act-frame">
               <img src="./static/teaser_web/teaser_3_final_action.jpg" alt="rollout 3">
+              <video class="tih-act-video" src="./static/teaser_web/3_web.mp4" muted loop playsinline preload="metadata"></video>
               <div class="tih-act-banner">Agreement reached</div>
             </div>
             <div class="tih-act-caption">State within task and base distribution</div>
@@ -492,9 +512,31 @@
           });
           updateArrows(i);
         }
+        // Hover an action: swap the distribution row to this variant AND
+        // play its rollout video as a loop. Leaving the action snaps the
+        // frame back to the still and rewinds the video to frame 0.
+        function setActionVideo(act, on) {
+          var frame = act.querySelector('.tih-act-frame');
+          var vid = act.querySelector('.tih-act-video');
+          if (!frame || !vid) return;
+          if (on) {
+            frame.classList.add('video-on');
+            try { vid.currentTime = 0; } catch (e) {}
+            var p = vid.play();
+            if (p && typeof p.catch === 'function') p.catch(function () {});
+          } else {
+            frame.classList.remove('video-on');
+            vid.pause();
+            try { vid.currentTime = 0; } catch (e) {}
+          }
+        }
         acts.forEach(function (a) {
           a.addEventListener('mouseenter', function () {
             activate(+a.dataset.i);
+            setActionVideo(a, true);
+          });
+          a.addEventListener('mouseleave', function () {
+            setActionVideo(a, false);
           });
         });
 
@@ -544,8 +586,11 @@
         // velocities.
         var DEFAULT_ROT_DEG = 10;
         var ROT_OVERRIDE_DEG = {
-          ref:  [null, 0, null],
-          task: [null, 0, null]
+          // variant 1: dial back the inward tilt so the arrows read with the
+          //            specific angles requested (ref 5°, task 7°)
+          // variant 2: zero the tilt so ref/task velocities look near-parallel
+          ref:  [5, 0, null],
+          task: [7, 0, null]
         };
         function computeArrowParams(kind, variantIdx) {
           var d = PATH_DATA[kind][variantIdx - 1];
