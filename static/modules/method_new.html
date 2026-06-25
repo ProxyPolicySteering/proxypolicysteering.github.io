@@ -131,19 +131,20 @@
      swatches labelling the base / ref / task / final action trajectories
      painted into the still. */
   .teaser-legend {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: max-content max-content;   /* 2x2 layout */
     justify-content: center;
-    gap: 16px;
+    column-gap: 22px;
+    row-gap: 6px;
     margin-top: 10px;
     font-family: var(--font-original);
     font-size: 12.5px;
     color: var(--sub);
   }
-  .teaser-legend .leg-item { display: inline-flex; align-items: center; gap: 7px; }
+  .teaser-legend .leg-item { display: inline-flex; align-items: center; gap: 9px; }
   .teaser-legend .leg-swatch {
     display: inline-block;
-    width: 22px;
+    width: 44px;          /* doubled from 22px so the colour reads at a glance */
     height: 3px;
     border-radius: 2px;
   }
@@ -237,14 +238,14 @@
     var TW = 1280, TH = 855;
     var T_START = { x: 650 / TW, y: 275 / TH };          // (row 275, col 650)
     var T_END_AT_0   = { x:  720 / TW, y: 616 / TH };    // γ = 0
-    var T_END_AT_0_3 = { x: 1080 / TW, y: 538 / TH };    // γ = 0.3
+    var T_END_AT_0_6 = { x: 1080 / TW, y: 538 / TH };    // γ = 0.6
     var T_END_AT_1   = { x: 1175 / TW, y: 500 / TH };    // γ = 1
-    // Piecewise linear: γ ∈ [0, 0.3] lerps anchor_0 → anchor_0.3,
-    // γ ∈ [0.3, 1] lerps anchor_0.3 → anchor_1. Hits all three points exactly.
+    // Piecewise linear: γ ∈ [0, 0.6] lerps anchor_0 → anchor_0.6,
+    // γ ∈ [0.6, 1] lerps anchor_0.6 → anchor_1. Hits all three points exactly.
     function endAt(g) {
       var t, p0, p1;
-      if (g <= 0.3) { t = g / 0.3;          p0 = T_END_AT_0;   p1 = T_END_AT_0_3; }
-      else          { t = (g - 0.3) / 0.7;  p0 = T_END_AT_0_3; p1 = T_END_AT_1;   }
+      if (g <= 0.6) { t = g / 0.6;          p0 = T_END_AT_0;   p1 = T_END_AT_0_6; }
+      else          { t = (g - 0.6) / 0.4;  p0 = T_END_AT_0_6; p1 = T_END_AT_1;   }
       return { x: p0.x + (p1.x - p0.x) * t,
                y: p0.y + (p1.y - p0.y) * t };
     }
