@@ -213,18 +213,14 @@
     var T_END_AT_0   = { x:  720 / TW, y: 616 / TH };    // γ = 0
     var T_END_AT_0_3 = { x: 1080 / TW, y: 538 / TH };    // γ = 0.3
     var T_END_AT_1   = { x: 1175 / TW, y: 500 / TH };    // γ = 1
-    // Quadratic f(γ) = a γ² + b γ + c through (0, p0), (0.3, p1), (1, p2).
-    function quadCoef(p0, p1, p2) {
-      var c = p0;
-      var a = (0.3 * (p2 - p0) - (p1 - p0)) / 0.21;
-      var b = (p2 - p0) - a;
-      return [a, b, c];
-    }
-    var EX = quadCoef(T_END_AT_0.x, T_END_AT_0_3.x, T_END_AT_1.x);
-    var EY = quadCoef(T_END_AT_0.y, T_END_AT_0_3.y, T_END_AT_1.y);
+    // Piecewise linear: γ ∈ [0, 0.3] lerps anchor_0 → anchor_0.3,
+    // γ ∈ [0.3, 1] lerps anchor_0.3 → anchor_1. Hits all three points exactly.
     function endAt(g) {
-      return { x: EX[0]*g*g + EX[1]*g + EX[2],
-               y: EY[0]*g*g + EY[1]*g + EY[2] };
+      var t, p0, p1;
+      if (g <= 0.3) { t = g / 0.3;          p0 = T_END_AT_0;   p1 = T_END_AT_0_3; }
+      else          { t = (g - 0.3) / 0.7;  p0 = T_END_AT_0_3; p1 = T_END_AT_1;   }
+      return { x: p0.x + (p1.x - p0.x) * t,
+               y: p0.y + (p1.y - p0.y) * t };
     }
 
     var teaserBg  = document.getElementById('teaserBg');
