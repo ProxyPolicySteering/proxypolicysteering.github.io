@@ -176,6 +176,22 @@
           height: auto;
           background: transparent;
         }
+        /* Caption below each distribution (π_base, π_ref, π_task, π_PPS)
+           — same colour as the corresponding equation term up top. */
+        .tih-dist-caption {
+          margin-top: 6px;
+          text-align: center;
+          font-family: 'Cambria Math','Latin Modern Math',Georgia,'Times New Roman',serif;
+          font-size: 16px;
+          font-weight: 600;
+          line-height: 1;
+        }
+        .tih-dist-caption i { font-style: italic; }
+        .tih-dist-caption sub { font-style: normal; font-size: 0.78em; }
+        .tih-dist-caption.base { color: #AF56BF; }
+        .tih-dist-caption.ref  { color: #F58A45; }
+        .tih-dist-caption.task { color: #407CB6; }
+        .tih-dist-caption.pps  { color: #55A86E; }
         .tih-arrow {
           display: flex;
           flex-direction: column;
@@ -254,14 +270,46 @@
           position: relative;
           transition: transform 0.25s ease, box-shadow 0.25s ease;
         }
-        .tih-act img {
+        /* Image frame holds the photo + its 75 % black bottom banner.
+           overflow: hidden so the banner respects the rounded corners. */
+        .tih-act-frame {
+          position: relative;
+          line-height: 0;
+          border-radius: 8px;
+          overflow: hidden;
+        }
+        .tih-act-frame img {
           display: block;
           width: 100%;
           height: auto;
-          border-radius: 8px;
+          border-radius: 0; /* frame handles rounding */
           cursor: pointer;
           filter: saturate(0.85) brightness(0.97);
           transition: filter 0.25s ease;
+        }
+        .tih-act.active .tih-act-frame img { filter: none; }
+        .tih-act-banner {
+          position: absolute;
+          left: 0; right: 0; bottom: 0;
+          background: rgba(0, 0, 0, 0.75);
+          color: #ffffff;
+          font-family: 'Inter','Helvetica Neue',Arial,sans-serif;
+          font-size: 14px;
+          font-weight: 600;
+          text-align: center;
+          padding: 6px 8px;
+          line-height: 1.2;
+        }
+        /* Per-image descriptive caption sits just below the image frame
+           inside the same grey container. */
+        .tih-act-caption {
+          margin-top: 8px;
+          text-align: center;
+          font-family: 'Inter','Helvetica Neue',Arial,sans-serif;
+          font-size: 12.5px;
+          font-weight: 500;
+          color: #6b6453;
+          line-height: 1.35;
         }
         .tih-act.active {
           transform: translateY(-3px);
@@ -287,20 +335,20 @@
           box-shadow: 0 16px 30px rgba(40, 32, 16, 0.22);
         }
 
-        /* 70%-opacity white mask over OTHER action images while hovering.
-           The pseudo-element matches the image inside the 12 px container
-           padding and shares the image's 8 px corner radius. */
-        .tih-act::after {
+        /* 70%-opacity white mask over OTHER action images while in the
+           floating state. The pseudo-element rides the image frame so it
+           covers only the photo + banner — the descriptive caption below
+           the frame stays unmasked and readable. */
+        .tih-act-frame::after {
           content: '';
           position: absolute;
-          inset: 12px;
+          inset: 0;
           background: rgba(255, 255, 255, 0.70);
-          border-radius: 8px;
           opacity: 0;
           pointer-events: none;
           transition: opacity 0.25s ease;
         }
-        .tih.hovering .tih-act:not(.active)::after { opacity: 1; }
+        .tih.hovering .tih-act:not(.active) .tih-act-frame::after { opacity: 1; }
 
         @media (max-width: 700px) {
           .tih-row.dist { grid-template-columns: repeat(2, 1fr); }
@@ -321,24 +369,54 @@
           <div class="tih-eq-cell pps">&nabla;<sub><i>a</i></sub> log <i>&pi;</i><sub>PPS</sub></div>
         </div>
         <div class="tih-row dist">
-          <div class="tih-dist"><img data-kind="base" src="./static/teaser_web/fm_base_1.png" alt="base distribution"></div>
+          <div class="tih-dist">
+            <img data-kind="base" src="./static/teaser_web/fm_base_1.png" alt="base distribution">
+            <div class="tih-dist-caption base"><i>&pi;</i><sub>base</sub></div>
+          </div>
           <div class="tih-arrow">
             <span class="lbl">Distill</span>
             <svg viewBox="0 0 34 12" xmlns="http://www.w3.org/2000/svg"><path d="M0 6 L34 6 M28 1 L34 6 L28 11" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </div>
-          <div class="tih-dist"><img data-kind="ref"  src="./static/teaser_web/fm_ref_1.png"  alt="ref distribution"></div>
+          <div class="tih-dist">
+            <img data-kind="ref" src="./static/teaser_web/fm_ref_1.png" alt="ref distribution">
+            <div class="tih-dist-caption ref"><i>&pi;</i><sub>ref</sub></div>
+          </div>
           <div class="tih-arrow">
             <span class="lbl">Finetune</span>
             <svg viewBox="0 0 34 12" xmlns="http://www.w3.org/2000/svg"><path d="M0 6 L34 6 M28 1 L34 6 L28 11" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </div>
-          <div class="tih-dist"><img data-kind="task" src="./static/teaser_web/fm_task_1.png" alt="task distribution"></div>
+          <div class="tih-dist">
+            <img data-kind="task" src="./static/teaser_web/fm_task_1.png" alt="task distribution">
+            <div class="tih-dist-caption task"><i>&pi;</i><sub>task</sub></div>
+          </div>
           <div class="tih-arrow tih-arrow-empty" aria-hidden="true"></div>
-          <div class="tih-dist"><img data-kind="pps"  src="./static/teaser_web/fm_pps_1.png"  alt="pps distribution"></div>
+          <div class="tih-dist">
+            <img data-kind="pps" src="./static/teaser_web/fm_pps_1.png" alt="pps distribution">
+            <div class="tih-dist-caption pps"><i>&pi;</i><sub>PPS</sub></div>
+          </div>
         </div>
         <div class="tih-row act">
-          <div class="tih-act active" data-i="1"><img src="./static/teaser_web/teaser_1_final_action.jpg" alt="rollout 1"></div>
-          <div class="tih-act"        data-i="2"><img src="./static/teaser_web/teaser_2_final_action.jpg" alt="rollout 2"></div>
-          <div class="tih-act"        data-i="3"><img src="./static/teaser_web/teaser_3_final_action.jpg" alt="rollout 3"></div>
+          <div class="tih-act active" data-i="1">
+            <div class="tih-act-frame">
+              <img src="./static/teaser_web/teaser_1_final_action.jpg" alt="rollout 1">
+              <div class="tih-act-banner">Novel task behavior</div>
+            </div>
+            <div class="tih-act-caption">State within task demonstrations</div>
+          </div>
+          <div class="tih-act" data-i="2">
+            <div class="tih-act-frame">
+              <img src="./static/teaser_web/teaser_2_final_action.jpg" alt="rollout 2">
+              <div class="tih-act-banner">Recovery via base prior</div>
+            </div>
+            <div class="tih-act-caption">State outside task demonstrations</div>
+          </div>
+          <div class="tih-act" data-i="3">
+            <div class="tih-act-frame">
+              <img src="./static/teaser_web/teaser_3_final_action.jpg" alt="rollout 3">
+              <div class="tih-act-banner">Agreement reached</div>
+            </div>
+            <div class="tih-act-caption">State within task and base distribution</div>
+          </div>
         </div>
       </div>
       <script>
