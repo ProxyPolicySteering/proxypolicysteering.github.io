@@ -139,6 +139,81 @@
         <img src="./static/images/teaser_web.png" alt="PPS method overview">
       </figure>
 
+      <!-- Interactive hover block: the four distribution panels (top) update
+           to match whichever action panel (bottom) the cursor is over. -->
+      <style>
+        .tih { margin: 22px 0 4px; }
+        .tih *, .tih *::before, .tih *::after { box-sizing: border-box; }
+        .tih-row { display: grid; gap: 14px; margin-bottom: 14px; }
+        .tih-row.dist { grid-template-columns: repeat(4, 1fr); }
+        .tih-row.act  { grid-template-columns: repeat(3, 1fr); margin-bottom: 0; }
+        .tih-dist, .tih-act { line-height: 0; position: relative; }
+        .tih-dist img, .tih-act img {
+          display: block;
+          width: 100%;
+          height: auto;
+          border-radius: 8px;
+          background: #fdfaf4;
+          transition: transform 0.22s ease, box-shadow 0.22s ease, filter 0.22s ease;
+        }
+        /* "Floating" look — soft elevation. The distributions row stays
+           floated (always reflects the active action); the actions row
+           floats only the currently-hovered (or default) panel. */
+        .tih-dist img {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 14px rgba(40, 32, 16, 0.10);
+        }
+        .tih-act img {
+          transform: translateY(0);
+          box-shadow: 0 1px 2px rgba(40, 32, 16, 0.05);
+          filter: saturate(0.85) brightness(0.97);
+          cursor: pointer;
+        }
+        .tih-act.active img {
+          transform: translateY(-4px);
+          box-shadow: 0 10px 22px rgba(40, 32, 16, 0.16);
+          filter: none;
+        }
+      </style>
+      <div class="tih" id="tih">
+        <div class="tih-row dist">
+          <div class="tih-dist"><img data-kind="base" src="./static/teaser_web/fm_base_1.png" alt="base distribution"></div>
+          <div class="tih-dist"><img data-kind="ref"  src="./static/teaser_web/fm_ref_1.png"  alt="ref distribution"></div>
+          <div class="tih-dist"><img data-kind="task" src="./static/teaser_web/fm_task_1.png" alt="task distribution"></div>
+          <div class="tih-dist"><img data-kind="pps"  src="./static/teaser_web/fm_pps_1.png"  alt="pps distribution"></div>
+        </div>
+        <div class="tih-row act">
+          <div class="tih-act active" data-i="1"><img src="./static/teaser_web/teaser_1_final_action.jpg" alt="rollout 1"></div>
+          <div class="tih-act"        data-i="2"><img src="./static/teaser_web/teaser_2_final_action.jpg" alt="rollout 2"></div>
+          <div class="tih-act"        data-i="3"><img src="./static/teaser_web/teaser_3_final_action.jpg" alt="rollout 3"></div>
+        </div>
+      </div>
+      <script>
+      (function () {
+        var root = document.getElementById('tih');
+        if (!root) return;
+        var acts = root.querySelectorAll('.tih-act');
+        var dists = root.querySelectorAll('.tih-dist img');
+        // Preload every variant so hover swaps don't flash on first hit.
+        ['base','ref','task','pps'].forEach(function (kind) {
+          [1,2,3].forEach(function (i) {
+            var im = new Image();
+            im.src = './static/teaser_web/fm_' + kind + '_' + i + '.png';
+          });
+        });
+        function activate(i) {
+          acts.forEach(function (a) { a.classList.toggle('active', +a.dataset.i === i); });
+          dists.forEach(function (img) {
+            img.src = './static/teaser_web/fm_' + img.dataset.kind + '_' + i + '.png';
+          });
+        }
+        acts.forEach(function (a) {
+          a.addEventListener('mouseenter', function () { activate(+a.dataset.i); });
+        });
+        // Default state shown on load: variant 1 + action 1 active.
+      })();
+      </script>
+
       <p>
         To estimate that direction without access to base gradients, PPS
         trains two lightweight proxy policies and takes their difference in
