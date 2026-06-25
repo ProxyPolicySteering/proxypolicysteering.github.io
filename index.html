@@ -163,12 +163,25 @@
           align-items: center;
           transform: translateY(-2px);
           transition: transform 0.25s ease;
-          position: relative;            /* containing block for the row-level focus mask */
         }
-        /* Focus-state white veil covering the WHOLE row — containers, gaps,
-           Distill/Finetune labels, dist captions. SVG arrows (z-index 10)
-           ride above this mask (z-index 5) and stay crisp. */
-        .tih-row.dist::after {
+        /* Focus-state white veil — applied per-cell so the 14 px grid gaps
+           stay unmasked (and the page background shows through them). Covers
+           each of the four dist containers AND each labeled Distill/Finetune
+           arrow cell. The SVG arrows on the dist plots (z-index 10) ride
+           above these masks (z-index 5). Alpha 0.70 = same as the action
+           row's mask. */
+        .tih-dist::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: rgba(255, 255, 255, 0.70);
+          border-radius: 12px;           /* match container rounding */
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity 0.22s ease;
+          z-index: 5;
+        }
+        .tih-arrow::after {
           content: '';
           position: absolute;
           inset: 0;
@@ -178,7 +191,8 @@
           transition: opacity 0.22s ease;
           z-index: 5;
         }
-        .tih.focused .tih-row.dist::after { opacity: 1; }
+        .tih.focused .tih-dist::after,
+        .tih.focused .tih-arrow::after { opacity: 1; }
         .tih-dist {
           background: #efece4;
           border-radius: 12px;
@@ -258,6 +272,7 @@
           justify-content: center;
           gap: 4px;
           color: #6b6453;
+          position: relative;            /* containing block for the focus mask ::after */
         }
         .tih-arrow .lbl {
           font-size: 14px;   /* +27% over the previous 11px */
@@ -413,15 +428,10 @@
           transform: translateY(-7px);
           box-shadow: 0 16px 30px rgba(40, 32, 16, 0.22);
         }
-        /* Focus state (cursor on the dist row):
-           - First row (eq strip) lifts a further 6 px so it visibly floats.
-           - Second row (dist containers) DROPS back to its resting position
-             and resting shadow. The arrow-pop + white veil on the plots
-             carry the focus instead of an extra lift on the containers. */
-        .tih.focused .tih-eq {
-          transform: translateY(-12px);
-          box-shadow: 0 18px 32px rgba(40, 32, 16, 0.22);
-        }
+        /* Focus state (cursor on the dist row): the equation strip stays at
+           its hovering position (no extra float), and the dist row drops
+           back to its resting position and resting shadow. The arrow-pop +
+           white veil on each cell carry the focus instead. */
         .tih.focused .tih-row.dist { transform: translateY(0); }
         .tih.focused .tih-dist { box-shadow: 0 6px 14px rgba(40, 32, 16, 0.10); }
 
