@@ -767,7 +767,8 @@
            already work on this page. -->
       <style>
         .ppsc { --ppsc-line:#e4dcc8; --ppsc-soft:#efece4; --ppsc-sub:#6b6453; --ppsc-ink:#1b1b1b;
-          --ppsc-panel:#fffdf8; --ppsc-pps:#4f9d5d; --ppsc-base:#8a72b3; --ppsc-lora:#c0563f; margin:14px 0 4px; }
+          --ppsc-panel:#fffdf8; --ppsc-pps:#4f9d5d; --ppsc-base:#8a72b3; --ppsc-lora:#c0563f;
+          --ppsc-spec:#407CB6; margin:14px 0 4px; }
         .ppsc *, .ppsc *::before, .ppsc *::after { box-sizing:border-box; }
         .ppsc-tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
         .ppsc-tabs button { font:600 14px/1 inherit; color:var(--ppsc-sub); background:var(--ppsc-panel);
@@ -783,7 +784,7 @@
           background:#000; border-radius:12px; border:2.5px solid var(--ppsc-pps); }
         .ppsc-tag { position:absolute; left:14px; top:14px; display:inline-flex; align-items:center; gap:6px;
           font-size:12.5px; line-height:1; font-weight:700; color:#fff; padding:5px 11px; border-radius:999px; }
-        .ppsc-tag.pps { background:var(--ppsc-pps); } .ppsc-tag.base { background:var(--ppsc-base); } .ppsc-tag.lora { background:var(--ppsc-lora); }
+        .ppsc-tag.pps { background:var(--ppsc-pps); } .ppsc-tag.base { background:var(--ppsc-base); } .ppsc-tag.lora { background:var(--ppsc-lora); } .ppsc-tag.spec { background:var(--ppsc-spec); }
         .ppsc-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:14px; }
         @media (max-width:560px){ .ppsc-row { grid-template-columns:1fr; } }
         .ppsc-item { position:relative; line-height:0; }
@@ -808,6 +809,7 @@
         .ppsc-overlay-text.base { color:var(--ppsc-base); }
         .ppsc-overlay-text.lora { color:var(--ppsc-lora); }
         .ppsc-overlay-text.pps  { color:var(--ppsc-pps); }
+        .ppsc-overlay-text.spec { color:var(--ppsc-spec); }
         /* Hero (full-width) video can carry a bigger "Success"; the two
            half-width items below need a smaller font + roomier line-height
            so the long Base/LoRA captions wrap to 2 lines without lines
@@ -830,7 +832,8 @@
           <button class="on" data-i="0">Coffee Brewing</button>
           <button data-i="1">Flower Arrangement</button>
           <button data-i="2">Jeans Folding</button>
-          <button data-i="3">Tissue Wiping</button>
+          <button data-i="3">Shoe Retrieval</button>
+          <button data-i="4">Tissue Wiping</button>
         </div>
         <div class="ppsc-stage">
           <div class="ppsc-panel on" data-i="0">
@@ -882,6 +885,18 @@
             </div>
           </div>
           <div class="ppsc-panel" data-i="3">
+            <div class="ppsc-row">
+              <div class="ppsc-item"><span class="ppsc-tag spec">Specialist</span>
+                <video src="./static/videos/compare/shoe_specialist.mp4" autoplay muted playsinline preload="metadata" data-speed="2"></video>
+                <span class="ppsc-speed-badge">2X</span>
+                <div class="ppsc-overlay"><span class="ppsc-overlay-text spec">Overfit to demonstrations</span></div></div>
+              <div class="ppsc-item"><span class="ppsc-tag lora">LoRA</span>
+                <video src="./static/videos/compare/shoe_lora.mp4" autoplay muted playsinline preload="metadata" data-speed="2"></video>
+                <span class="ppsc-speed-badge">2X</span>
+                <div class="ppsc-overlay"><span class="ppsc-overlay-text lora">Loses robust execution</span></div></div>
+            </div>
+          </div>
+          <div class="ppsc-panel" data-i="4">
             <div class="ppsc-hero"><span class="ppsc-tag pps">★ PPS (Ours)</span>
               <video src="./static/videos/compare/tissue_pps.mp4" autoplay muted playsinline preload="metadata" data-speed="2"></video>
               <span class="ppsc-speed-badge">2X</span>
