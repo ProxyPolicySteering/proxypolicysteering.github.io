@@ -160,13 +160,20 @@
   function arrow(ctx, a, b, color, width, head) {
     var ang = Math.atan2(b.y - a.y, b.x - a.x);
     var hs = head || 8;
-    // Stop the shaft at the back-of-triangle (b − hs·cos(0.42)·dir ≈ b − 0.913·hs·dir)
-    // and use a butt cap so the line ends flush against the head's base — no
-    // rounded bulge poking past the tip, no shaft/triangle overlap seam.
     var back = hs * Math.cos(0.42);
     var endX = b.x - back * Math.cos(ang);
     var endY = b.y - back * Math.sin(ang);
-    ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = width; ctx.lineCap = 'butt';
+    // color may be a string OR a 2-element array [c0, c1] — the array
+    // form draws a linear gradient from a → b (used for the orange→blue
+    // residual arrow on the single-path widget).
+    var stroke = color;
+    if (Array.isArray(color)) {
+      var grad = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
+      grad.addColorStop(0, color[0]);
+      grad.addColorStop(1, color[1]);
+      stroke = grad;
+    }
+    ctx.strokeStyle = stroke; ctx.fillStyle = stroke; ctx.lineWidth = width; ctx.lineCap = 'butt';
     ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(endX, endY); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(b.x, b.y);
     ctx.lineTo(b.x - hs * Math.cos(ang - 0.42), b.y - hs * Math.sin(ang - 0.42));
@@ -745,8 +752,12 @@
     var vBx = (lead.bi.x - probe.x) * GAIN, vBy = (lead.bi.y - probe.y) * GAIN;
     var vRx = (lead.ti.x - lead.bi.x) * GAIN * g, vRy = (lead.ti.y - lead.bi.y) * GAIN * g;
     var baseTip = tip(vBx, vBy), ppsTip = tip(vBx + vRx, vBy + vRy);
+    // Residual arrow is rendered as an orange→blue gradient (ref → task)
+    // instead of the flat resid colour, matching the dist palette used on
+    // the method-teaser block.
+    var RESID_GRAD = ['#F58A45', '#407CB6'];
     arrow(ctx, ps, baseTip, p.base, 2.4, 8.5);
-    if (g > 0.001) arrow(ctx, baseTip, ppsTip, p.resid, 2.4, 8.5);
+    if (g > 0.001) arrow(ctx, baseTip, ppsTip, RESID_GRAD, 2.4, 8.5);
     arrow(ctx, ps, ppsTip, p.pps, 3.0, 10.5);
 
     this.legendCard(ctx, p, [
@@ -754,7 +765,7 @@
         parts: [{ t: 'flow-matching path' }] },
       { type: 'arrow', color: p.base,
         parts: [{ t: 'v', i: true }, { t: 'base', sub: true }] },
-      { type: 'arrow', color: p.resid,
+      { type: 'arrow', color: RESID_GRAD,
         parts: [
           { t: 'γ · (' },
           { t: 'v', i: true }, { t: 'task', sub: true },
