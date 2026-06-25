@@ -363,16 +363,12 @@
         acts.forEach(function (a) {
           a.addEventListener('mouseenter', function () {
             activate(+a.dataset.i);
-            root.classList.add('hovering');
           });
         });
-        // Removing the .hovering class on root's mouseleave drops the
-        // extra-lift on dist row + active container and clears the masks
-        // on the other action containers. The currently-active selection
-        // (and its dist variant) persists.
-        root.addEventListener('mouseleave', function () {
-          root.classList.remove('hovering');
-        });
+        // The .hovering "floating" state is permanent — applied on init
+        // and never removed. Hovering another image just swaps which
+        // panel is active; there is no non-floating state.
+        root.classList.add('hovering');
         // Default state shown on load: variant 1 + action 1 active.
         activate(1);
       })();
