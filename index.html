@@ -207,10 +207,14 @@
           white-space: nowrap;
         }
         /* SVG sized to match its inner path width so the arrow lands at the
-           horizontal centre of its grid column (was 40px-wide SVG holding a
-           34-px path, which shifted the visual arrow ~3 px left of centre). */
-        .tih-arrow svg { display: block; width: 34px; height: 12px; }
+           horizontal centre of its grid column. overflow: visible so the
+           thick stroke caps + arrow head aren't clipped at the viewBox edge. */
+        .tih-arrow svg { display: block; width: 34px; height: 12px; overflow: visible; }
         .tih-arrow-empty { visibility: hidden; }
+        /* Distill arrow nudged right a few px so it lands at the optical
+           midpoint between the unprefixed ∇log π_base and the γ-prefixed
+           ∇log π_ref — the γ shifts that midpoint to the right. */
+        .tih-row.dist > .tih-arrow:first-of-type { transform: translateX(4px); }
 
         /* Wide-but-short equation strip above the dist row. Uses the SAME
            7-column grid template so each math expression sits vertically
@@ -251,7 +255,7 @@
           color: #6b6453;    /* matches the Distill / Finetune arrow colour */
           line-height: 1;
         }
-        .tih-eq-op svg { display: block; margin: 0 auto; width: 19px; height: 10px; color: #6b6453; }
+        .tih-eq-op svg { display: block; margin: 0 auto; width: 19px; height: 10px; color: #6b6453; overflow: visible; }
 
         /* Row 2: each action gets its OWN grey rounded container.
            Active container floats; while hovering, BOTH the active container
@@ -364,7 +368,7 @@
           <div class="tih-eq-op">+</div>
           <div class="tih-eq-cell task"><span class="gam"><i>&gamma;</i></span> &nabla;<sub><i>a</i></sub> log <i>&pi;</i><sub>task</sub></div>
           <div class="tih-eq-op">
-            <svg viewBox="0 0 19 10" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M0 5 L19 5 M14 1 L19 5 L14 9" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <svg viewBox="0 0 19 10" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M0 5 L19 5 M14 1 L19 5 L14 9" stroke="currentColor" stroke-width="2.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </div>
           <div class="tih-eq-cell pps">&nabla;<sub><i>a</i></sub> log <i>&pi;</i><sub>PPS</sub></div>
         </div>
@@ -375,7 +379,7 @@
           </div>
           <div class="tih-arrow">
             <span class="lbl">Distill</span>
-            <svg viewBox="0 0 34 12" xmlns="http://www.w3.org/2000/svg"><path d="M0 6 L34 6 M28 1 L34 6 L28 11" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <svg viewBox="0 0 34 12" xmlns="http://www.w3.org/2000/svg"><path d="M0 6 L34 6 M28 1 L34 6 L28 11" stroke="currentColor" stroke-width="2.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </div>
           <div class="tih-dist">
             <img data-kind="ref" src="./static/teaser_web/fm_ref_1.png" alt="ref distribution">
@@ -383,7 +387,7 @@
           </div>
           <div class="tih-arrow">
             <span class="lbl">Finetune</span>
-            <svg viewBox="0 0 34 12" xmlns="http://www.w3.org/2000/svg"><path d="M0 6 L34 6 M28 1 L34 6 L28 11" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <svg viewBox="0 0 34 12" xmlns="http://www.w3.org/2000/svg"><path d="M0 6 L34 6 M28 1 L34 6 L28 11" stroke="currentColor" stroke-width="2.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </div>
           <div class="tih-dist">
             <img data-kind="task" src="./static/teaser_web/fm_task_1.png" alt="task distribution">
