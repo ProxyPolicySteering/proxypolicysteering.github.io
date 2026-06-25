@@ -17,8 +17,8 @@
     },
     {
       name: 'Fold the jeans', origin: 'human',
-      pps:  [['../images/recovery/ours_2_grey.png', 'a person nudges the jeans', 'fail'], ['../images/recovery/ours_3_grey.png', 'folds them again', 'recover']],
-      lora: [['../images/recovery/lora_2_grey.png', 'a person nudges the jeans', 'fail'], ['../images/recovery/lora_4_grey.png', 'grabs the middle', 'fail']]
+      pps:  [['../images/recovery/ours_2_grey.png', 'a person unfolds the jeans after the robot fold it', 'fail'], ['../images/recovery/ours_3_grey.png', 'folds them again', 'recover']],
+      lora: [['../images/recovery/lora_2_grey.png', 'a person unfolds the jeans after the robot fold it', 'fail'], ['../images/recovery/lora_4_grey.png', 'grabs the middle', 'fail']]
     }
   ];
   var ORIGIN = { self: 'the policy slips on its own', human: 'a person interferes' };
