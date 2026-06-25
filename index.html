@@ -163,7 +163,22 @@
           align-items: center;
           transform: translateY(-2px);
           transition: transform 0.25s ease;
+          position: relative;            /* containing block for the row-level focus mask */
         }
+        /* Focus-state white veil covering the WHOLE row — containers, gaps,
+           Distill/Finetune labels, dist captions. SVG arrows (z-index 10)
+           ride above this mask (z-index 5) and stay crisp. */
+        .tih-row.dist::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: rgba(255, 255, 255, 0.70);
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity 0.22s ease;
+          z-index: 5;
+        }
+        .tih.focused .tih-row.dist::after { opacity: 1; }
         .tih-dist {
           background: #efece4;
           border-radius: 12px;
@@ -197,9 +212,9 @@
         .tih-dist-frame {
           position: relative;
           line-height: 0;
-          isolation: isolate;    /* make the frame its own stacking context so the
-                                    z-indexed ::after mask + .tih-dist-arrow don't
-                                    leak ordering to siblings outside this frame */
+          /* No `isolation: isolate` here: we want the SVG arrows inside this
+             frame to compete in .tih-row.dist's stacking context so they can
+             ride above the row-level focus mask. */
         }
         .tih-dist-arrow {
           position: absolute;
@@ -208,23 +223,8 @@
           height: 100%;
           pointer-events: none;
           overflow: visible;     /* let stroke caps + arrow head extend a hair beyond bounds */
-          z-index: 2;            /* always above the focus-state white mask */
+          z-index: 10;           /* above the row-level white mask (z-index 5) */
         }
-        /* Focus-state white veil over each dist plot (same 70 % white as the
-           action row's mask). Sits between the image (z-index auto = 0) and
-           the SVG arrow (z-index 2) so the arrows stay crisp on top while the
-           plot fades back. */
-        .tih-dist-frame::after {
-          content: '';
-          position: absolute;
-          inset: 0;
-          background: rgba(255, 255, 255, 0.70);
-          opacity: 0;
-          pointer-events: none;
-          transition: opacity 0.22s ease;
-          z-index: 1;
-        }
-        .tih.focused .tih-dist-frame::after { opacity: 1; }
         .tih-dist-arrow path { fill: none; stroke-width: 10; stroke-linecap: round; stroke-linejoin: round; }
         .tih-dist-arrow.base path { stroke: #AF56BF; }
         .tih-dist-arrow.ref  path { stroke: #F58A45; }
