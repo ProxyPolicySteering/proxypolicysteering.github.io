@@ -152,7 +152,10 @@
            @ 50px) — the slot between containers 3 and 4 holds an empty
            placeholder so all four containers stay evenly spaced. */
         .tih-row.dist {
-          grid-template-columns: 1fr 50px 1fr 50px 1fr 50px 1fr;
+          /* arrow slots shrunk to 40 px, placeholder between 3 and 4 down
+             to 25 px — both reclaim horizontal space, so the four 1fr
+             container columns and the distributions inside them grow. */
+          grid-template-columns: 1fr 40px 1fr 40px 1fr 25px 1fr;
           gap: 14px;
           align-items: center;
           transform: translateY(-2px);
@@ -161,7 +164,7 @@
         .tih-dist {
           background: #efece4;
           border-radius: 12px;
-          padding: 10px;
+          padding: 8px;
           line-height: 0;
           position: relative;
           box-shadow: 0 6px 14px rgba(40, 32, 16, 0.10);
