@@ -146,16 +146,15 @@
         .tih *, .tih *::before, .tih *::after { box-sizing: border-box; }
         .tih-row { display: grid; gap: 14px; margin-bottom: 14px; }
 
-        /* Row 1: each distribution gets its OWN grey rounded container. */
-        .tih-row.dist { grid-template-columns: repeat(4, 1fr); }
-        .tih-dist {
+        /* Row 1: ONE big grey rounded container holds all four distributions. */
+        .tih-row.dist {
+          grid-template-columns: repeat(4, 1fr);
+          gap: 14px;
           background: #efece4;
-          border-radius: 12px;
-          padding: 12px;
-          line-height: 0;
-          position: relative;
-          box-shadow: 0 6px 14px rgba(40, 32, 16, 0.10);
+          border-radius: 14px;
+          padding: 14px;
         }
+        .tih-dist { line-height: 0; position: relative; }
         .tih-dist img {
           display: block;
           width: 100%;
@@ -163,21 +162,24 @@
           background: transparent;
         }
 
-        /* Row 2: ONE big grey rounded container holds all three actions. */
+        /* Row 2: each action gets its OWN grey rounded container. */
         .tih-row.act {
           grid-template-columns: repeat(3, 1fr);
           gap: 14px;
           margin-bottom: 0;
-          background: #efece4;
-          border-radius: 14px;
-          padding: 14px;
         }
-        .tih-act { line-height: 0; position: relative; }
+        .tih-act {
+          background: #efece4;
+          border-radius: 12px;
+          padding: 12px;
+          line-height: 0;
+          position: relative;
+        }
         .tih-act img {
           display: block;
           width: 100%;
           height: auto;
-          border-radius: 10px;
+          border-radius: 8px;
           cursor: pointer;
           filter: saturate(0.85) brightness(0.97);
           transition: transform 0.22s ease, box-shadow 0.22s ease, filter 0.22s ease;
