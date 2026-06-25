@@ -193,6 +193,41 @@
         .tih-arrow svg { display: block; width: 40px; height: 12px; }
         .tih-arrow-empty { visibility: hidden; }
 
+        /* Wide-but-short equation strip above the dist row. Uses the SAME
+           7-column grid template so each math expression sits vertically
+           above its corresponding distribution. Thick − and + operators
+           between the first three cells, → before the last cell. */
+        .tih-eq {
+          display: grid;
+          grid-template-columns: 1fr 40px 1fr 40px 1fr 25px 1fr;
+          gap: 14px;
+          align-items: center;
+          margin-bottom: 14px;
+          background: #efece4;
+          border-radius: 12px;
+          padding: 10px 10px;
+          transform: translateY(-2px);
+          box-shadow: 0 6px 14px rgba(40, 32, 16, 0.10);
+          transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .tih-eq-cell {
+          text-align: center;
+          font-family: 'Cambria Math','Latin Modern Math',Georgia,'Times New Roman',serif;
+          font-size: 15px;
+          color: #1b1b1b;
+          line-height: 1.15;
+        }
+        .tih-eq-cell i { font-style: italic; }
+        .tih-eq-cell sub { font-style: normal; font-size: 0.78em; }
+        .tih-eq-op {
+          text-align: center;
+          font-weight: 900;
+          font-size: 22px;
+          color: #1b1b1b;
+          line-height: 1;
+        }
+        .tih-eq-op svg { display: block; margin: 0 auto; width: 24px; height: 10px; color: #1b1b1b; }
+
         /* Row 2: each action gets its OWN grey rounded container.
            Active container floats; while hovering, BOTH the active container
            and the dist container lift higher together, and the other two
@@ -234,6 +269,10 @@
         .tih.hovering .tih-dist {
           box-shadow: 0 16px 28px rgba(40, 32, 16, 0.18);
         }
+        .tih.hovering .tih-eq {
+          transform: translateY(-6px);
+          box-shadow: 0 16px 28px rgba(40, 32, 16, 0.18);
+        }
         .tih.hovering .tih-act.active {
           transform: translateY(-7px);
           box-shadow: 0 16px 30px rgba(40, 32, 16, 0.22);
@@ -257,9 +296,21 @@
         @media (max-width: 700px) {
           .tih-row.dist { grid-template-columns: repeat(2, 1fr); }
           .tih-arrow { display: none; }
+          .tih-eq { display: none; }
         }
       </style>
       <div class="tih" id="tih">
+        <div class="tih-eq">
+          <div class="tih-eq-cell">&nabla;<sub><i>a</i></sub> log <i>&pi;</i><sub>base</sub></div>
+          <div class="tih-eq-op">&minus;</div>
+          <div class="tih-eq-cell"><i>&gamma;</i> &nabla;<sub><i>a</i></sub> log <i>&pi;</i><sub>ref</sub></div>
+          <div class="tih-eq-op">+</div>
+          <div class="tih-eq-cell"><i>&gamma;</i> &nabla;<sub><i>a</i></sub> log <i>&pi;</i><sub>task</sub></div>
+          <div class="tih-eq-op">
+            <svg viewBox="0 0 24 10" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M0 5 L19 5 M14 1 L19 5 L14 9" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="tih-eq-cell">&nabla;<sub><i>a</i></sub> log <i>&pi;</i><sub>PPS</sub></div>
+        </div>
         <div class="tih-row dist">
           <div class="tih-dist"><img data-kind="base" src="./static/teaser_web/fm_base_1.png" alt="base distribution"></div>
           <div class="tih-arrow">
