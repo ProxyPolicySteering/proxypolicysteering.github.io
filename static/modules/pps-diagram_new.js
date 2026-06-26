@@ -438,7 +438,7 @@
       else { ctx.font = '500 12.5px ' + fontStack(); w = ctx.measureText(items[i].label).width; }
       tw = Math.max(tw, w);
     }
-    var W = pad * 2 + gw + 7 + tw, H = pad * 2 + items.length * rowH - (rowH - 13), x0 = 14, y0 = 14;
+    var W = pad * 2 + gw + 7 + tw, H = pad * 2 + items.length * rowH - (rowH - 13), x0 = 14, y0 = 46;
     ctx.fillStyle = rgbaStr(p.bg, 0.85); roundRect(ctx, x0, y0, W, H, 9); ctx.fill();
     ctx.strokeStyle = rgbaStr(p.sub, 0.28); ctx.lineWidth = 1; roundRect(ctx, x0, y0, W, H, 9); ctx.stroke();
     for (var k = 0; k < items.length; k++) {
@@ -693,8 +693,8 @@
     // to fixed SCREEN positions near the bottom of the canvas (independent
     // of how the kernels move with γ).
     var labelX = this.field._w / 2;
-    var labelY = this.field._h - 42;
-    var subY   = this.field._h - 18;
+    var labelY = this.field._h - 62;
+    var subY   = this.field._h - 38;
     ctx.font = '600 15px ' + fontStack(); ctx.textAlign = 'center';
     ctx.fillStyle = ppsCol;
     ctx.fillText('action distribution', labelX, labelY);
