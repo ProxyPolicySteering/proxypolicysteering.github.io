@@ -6,17 +6,17 @@
   // frame: [src, caption, kind]  kind: 'fail' (red) | 'recover' (green)
   var TASKS = [
     {
-      name: 'Pack the shoes', origin: 'self',
+      name: 'Recover from a failed grasping', origin: 'self',
       pps:  [['../images/recovery/shoe_2_grey.png', 'handle slips', 'fail'], ['../images/recovery/shoe_3_grey.png', 'retries and re-grasps', 'recover']],
       lora: [['../images/recovery/shoe_2_2_grey.png', 'grasp fails', 'fail'], ['../images/recovery/shoe_2_3_grey.png', 'places anyway', 'fail']]
     },
     {
-      name: 'Brew the coffee', origin: 'self',
+      name: 'Recover from a missed contact', origin: 'self',
       pps:  [['../images/recovery/coffee_2_grey.png', 'misses the lid', 'fail'], ['../images/recovery/coffee_3_grey.png', 'retries and seats it', 'recover']],
       lora: [['../images/recovery/coffee_2_2_grey.png', 'misses the lid', 'fail'], ['../images/recovery/coffee_2_3_grey.png', 'moves on regardless', 'fail']]
     },
     {
-      name: 'Fold the jeans', origin: 'human',
+      name: 'Recover from a human perturbation', origin: 'human',
       pps:  [['../images/recovery/ours_2_grey.png', 'a person unfolds the jeans after the robot fold it', 'fail'], ['../images/recovery/ours_3_grey.png', 'folds them again', 'recover']],
       lora: [['../images/recovery/lora_2_grey.png', 'a person unfolds the jeans after the robot fold it', 'fail'], ['../images/recovery/lora_4_grey.png', 'grabs the middle', 'fail']]
     }
@@ -70,7 +70,7 @@
     var tabs = document.getElementById('rtabs');
     TASKS.forEach(function (t, i) {
       var b = document.createElement('button');
-      b.innerHTML = '<span class="tn">' + (i + 1) + '</span>' + t.name;
+      b.textContent = t.name;
       b.onclick = function () { render(i); };
       tabs.appendChild(b);
     });
