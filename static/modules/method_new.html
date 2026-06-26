@@ -105,6 +105,19 @@
   .ticks { display: flex; justify-content: space-between; font-family: var(--font-mono);
     font-size: 10px; color: var(--sub); margin-top: 4px; }
 
+  /* γ slider "Try me" hint */
+  .gamma-wrap { position: relative; margin-top: 30px; }
+  .gamma-hint { position:absolute; bottom:26px; z-index:6; transform:translateX(-50%);
+    display:inline-flex; align-items:center; gap:6px; padding:5px 11px 5px 9px; border-radius:999px;
+    white-space:nowrap; pointer-events:none; font:600 12px/1 var(--font-original);
+    background:#fffdf8; color:#3f8f5a; border:1.5px solid #4f9d5d; box-shadow:0 4px 12px rgba(40,32,16,.14); opacity:0; }
+  .gamma-hint .gh-cursor { width:13px; height:13px; flex:0 0 auto; color:#4f9d5d; }
+  .gamma-hint::after { content:''; position:absolute; top:100%; left:50%; margin-left:-5px; border:5px solid transparent; border-top-color:#4f9d5d; }
+  .gamma-hint.show { opacity:1; }
+  @keyframes gh-bob { 0%,100%{ transform:translateX(calc(-50% - 5px)); } 50%{ transform:translateX(calc(-50% + 5px)); } }
+  .gamma-hint.show.gh-bob { animation: gh-bob 1.5s ease-in-out infinite; }
+  @media (prefers-reduced-motion: reduce) { .gamma-hint.gh-bob { animation:none; } }
+
   /* Teaser image + animated green-trajectory overlay (replaces the
      success-rate-vs-γ plot in the right column). */
   .teaserwrap {
@@ -360,6 +373,26 @@
       document.getElementById('eqg').textContent = fmt(g);
       syncTeaser();
     });
+
+    /* γ slider "Try me" hint: bobbing pill on the thumb + one auto-wiggle */
+    (function () {
+      var wrap = document.createElement('div'); wrap.className = 'gamma-wrap';
+      gammaEl.parentNode.insertBefore(wrap, gammaEl); wrap.appendChild(gammaEl);
+      var pill = document.createElement('div'); pill.className = 'gamma-hint';
+      pill.innerHTML = '<svg class="gh-cursor" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 2.5l15.5 8.2-6.6 1.6-1.9 6.6z"/></svg><span>' + ('ontouchstart' in window ? 'Drag me' : 'Try me') + '</span>';
+      wrap.appendChild(pill);
+      var RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches, dismissed = false, wiggled = false;
+      function place(){ var lo=parseFloat(gammaEl.min),hi=parseFloat(gammaEl.max),v=parseFloat(gammaEl.value),f=(v-lo)/(hi-lo),w=gammaEl.clientWidth,t=18; pill.style.left=(t/2+f*(w-t))+'px'; }
+      function show(){ place(); pill.classList.add('show'); if(!RM) pill.classList.add('gh-bob'); }
+      function dismiss(){ if(dismissed)return; dismissed=true; pill.classList.remove('show','gh-bob'); }
+      gammaEl.addEventListener('input', place); window.addEventListener('resize', place);
+      ['pointerdown','touchstart','keydown'].forEach(function(e){ gammaEl.addEventListener(e, dismiss); });
+      function applyG(g){ gammaEl.value=g.toFixed(2); gammaEl.dispatchEvent(new Event('input')); }
+      function tween(a,b,d,done){ var t0=null; function s(ts){ if(dismissed)return; if(t0===null)t0=ts; var k=Math.min(1,(ts-t0)/d); var e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2; applyG(a+(b-a)*e); if(k<1)requestAnimationFrame(s); else if(done)done(); } requestAnimationFrame(s); }
+      function wiggle(){ if(wiggled||dismissed||RM)return; wiggled=true; var st=parseFloat(gammaEl.value); tween(st,0.35,820,function(){ tween(0.35,st,820); }); }
+      var begun=false; function begin(){ if(begun)return; begun=true; show(); setTimeout(wiggle,750); }
+      if(document.readyState==='complete') setTimeout(begin,150); else window.addEventListener('load', function(){ setTimeout(begin,150); });
+    })();
 
     function setDir(d) {
       document.body.setAttribute('data-theme', d); diag.theme = d;

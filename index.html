@@ -713,6 +713,68 @@
       })();
       </script>
 
+      <!-- Hover hint: a branded "Try me" pill above the action row plus a
+           sequential pulse on the two unexplored panels (Recovery, Agreement).
+           Clears on the first hover (desktop) or tap (touch). -->
+      <style>
+        .tih-row.act { position: relative; }
+        .tih-hint-pill {
+          position: absolute; z-index: 30; left: 50%; top: -14px;
+          display: inline-flex; align-items: center; gap: 7px;
+          padding: 7px 13px 7px 10px; border-radius: 999px; white-space: nowrap;
+          pointer-events: none; font: 600 13px/1 'Inter','Helvetica Neue',Arial,sans-serif;
+          background: #fffdf8; color: #3f8f5a; border: 1.5px solid #4f9d5d;
+          box-shadow: 0 6px 16px rgba(40,32,16,.12);
+          --bob: translateX(-50%); transform: var(--bob);
+          opacity: 0; animation: tih-bob 1.8s ease-in-out infinite;
+        }
+        .tih-hint-pill .hint-cursor { width: 15px; height: 15px; flex: 0 0 auto; color: #4f9d5d; }
+        .tih:not(.tih-hinted) .tih-hint-pill { opacity: 1; }
+        @keyframes tih-bob { 0%,100% { transform: var(--bob) translateY(0); } 50% { transform: var(--bob) translateY(-5px); } }
+        @keyframes tih-glow { 0%,100% { box-shadow: 0 0 0 0 rgba(79,157,93,0); } 50% { box-shadow: 0 0 0 5px rgba(79,157,93,.38); } }
+        .tih:not(.tih-hinted) .tih-act[data-i="2"] { animation: tih-glow 2.2s ease-in-out infinite; }
+        .tih:not(.tih-hinted) .tih-act[data-i="3"] { animation: tih-glow 2.2s ease-in-out infinite; animation-delay: .6s; }
+        @media (prefers-reduced-motion: reduce) {
+          .tih-hint-pill { animation: none !important; }
+          .tih .tih-act { animation: none !important; }
+        }
+      </style>
+      <script>
+      (function () {
+        var tih = document.getElementById('tih');
+        if (!tih) return;
+        var actRow = tih.querySelector('.tih-row.act');
+        var acts = Array.prototype.slice.call(tih.querySelectorAll('.tih-act'));
+        if (!actRow || !acts.length) return;
+        var touch = window.matchMedia('(hover: none), (pointer: coarse)').matches;
+
+        var pill = document.createElement('div');
+        pill.className = 'tih-hint-pill';
+        pill.innerHTML = '<svg class="hint-cursor" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 2.5l15.5 8.2-6.6 1.6-1.9 6.6z"/></svg><span class="hint-text">' + (touch ? 'Tap me' : 'Try me') + '</span>';
+        actRow.appendChild(pill);
+
+        var dismissed = false;
+        function dismiss() { if (dismissed) return; dismissed = true; tih.classList.add('tih-hinted'); }
+
+        // desktop: entering any non-default panel clears the hint
+        acts.forEach(function (a) {
+          a.addEventListener('mouseenter', function () { if (+a.dataset.i !== 1) dismiss(); });
+        });
+
+        // touch: tap switches panels (reuse the core mouseenter/leave logic)
+        var lastTap = null;
+        acts.forEach(function (a) {
+          a.addEventListener('click', function () {
+            if (!touch) return;
+            if (lastTap && lastTap !== a) lastTap.dispatchEvent(new MouseEvent('mouseleave', { bubbles: true }));
+            a.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+            lastTap = a;
+            if (+a.dataset.i !== 1) dismiss();
+          });
+        });
+      })();
+      </script>
+
       <p>
         To estimate that direction without access to base gradients, PPS
         trains two lightweight proxy policies and takes their difference in
@@ -774,7 +836,7 @@
       <!-- Single-path interactive steering diagram. Subheader + description
            removed; the iframe carries the explanation itself. -->
       <div class="pps-embed-block">
-        <iframe class="pps-embed-frame" data-embed src="./static/modules/method_new.html?v=8"
+        <iframe class="pps-embed-frame" data-embed src="./static/modules/method_new.html?v=11"
                 title="Interactive method diagram (single-path variant)" scrolling="no" loading="lazy"></iframe>
       </div>
     </section>
@@ -1062,6 +1124,9 @@
           if (!overlay) return;
           v.addEventListener('ended', function () {
             overlay.classList.add('show');
+            var capEl = overlay.querySelector('.ppsc-overlay-text');
+            var words = capEl ? capEl.textContent.trim().split(/\s+/).length : 5;
+            var holdMs = Math.max(3500, Math.min(9000, 1200 + words * 650));
             setTimeout(function () {
               overlay.classList.remove('show');
               try { v.currentTime = 0; } catch (e) {}
@@ -1070,13 +1135,96 @@
               if (panel && panel.classList.contains('on')) {
                 var pr = v.play(); if (pr && pr.catch) pr.catch(function () {});
               }
-            }, 3000);
+            }, holdMs);
           });
         });
       })();
       </script>
 
-      <!-- Real-World Tasks and Simulated Tasks sections commented out — the
+<!-- Task navigation (added): a now-showing bar with prev/next arrows that
+           stays in sync with the task tabs. Hero-arrow and tab-flanking-arrow
+           styles are included too, so the control style can be switched by
+           changing the .ppsc data-nav value: a = arrows on the hero video,
+           b = arrows beside the tabs, c = hero arrows + swipe, d = now-showing bar. -->
+      <style>
+        .ppsc-stage { position: relative; }
+        .ppsc-hero { position: relative; }
+        .ppsc-nav-arrow { position:absolute; z-index:20; top:50%; transform:translateY(-50%);
+          width:44px; height:44px; border-radius:50%; border:0; cursor:pointer;
+          background:rgba(27,27,27,0.55); color:#fff; display:none; align-items:center; justify-content:center;
+          transition:background .15s ease; }
+        .ppsc-nav-arrow:hover { background:rgba(27,27,27,0.82); }
+        .ppsc-nav-arrow svg { width:20px; height:20px; }
+        .ppsc-nav-arrow.prev { left:12px; } .ppsc-nav-arrow.next { right:12px; }
+        .ppsc[data-nav="a"] .ppsc-panel.on .ppsc-hero .ppsc-nav-arrow,
+        .ppsc[data-nav="c"] .ppsc-panel.on .ppsc-hero .ppsc-nav-arrow { display:flex; }
+        .ppsc-tabwrap { display:flex; align-items:stretch; gap:10px; margin-bottom:16px; }
+        .ppsc-tabwrap .ppsc-tabs { flex:1 1 auto; margin-bottom:0; }
+        .ppsc-side-arrow { flex:0 0 auto; align-self:stretch; width:48px; border-radius:12px;
+          border:1px solid var(--ppsc-line); background:var(--ppsc-panel); color:var(--ppsc-sub);
+          cursor:pointer; display:none; align-items:center; justify-content:center; }
+        .ppsc-side-arrow:hover { background:var(--ppsc-soft); color:var(--ppsc-ink); }
+        .ppsc-side-arrow svg { width:22px; height:22px; }
+        .ppsc[data-nav="b"] .ppsc-side-arrow { display:flex; }
+        .ppsc-nowbar { display:none; align-items:center; justify-content:center; gap:16px; margin-bottom:14px; }
+        .ppsc[data-nav="d"] .ppsc-nowbar { display:flex; }
+        .ppsc-nowbar button { width:38px; height:38px; border-radius:50%; border:1px solid var(--ppsc-line);
+          background:var(--ppsc-panel); color:var(--ppsc-ink); cursor:pointer; display:flex; align-items:center; justify-content:center; }
+        .ppsc-nowbar button:hover { background:var(--ppsc-soft); }
+        .ppsc-nowbar button svg { width:18px; height:18px; }
+        .ppsc-nowbar .now-label { font:700 17px/1 'Inter','Helvetica Neue',Arial,sans-serif; color:var(--ppsc-ink); min-width:240px; text-align:center; }
+        .ppsc-nowbar .now-count { color:var(--ppsc-sub); font-weight:500; font-size:14px; }
+      </style>
+      <script>
+      (function () {
+        var ppsc = document.querySelector('.ppsc'); if (!ppsc) return;
+        var tabsWrap = ppsc.querySelector('#ppsc-tabs');
+        var tabBtns = Array.prototype.slice.call(tabsWrap.querySelectorAll('button'));
+        var names = tabBtns.map(function (b) { return b.textContent.trim(); });
+        var N = tabBtns.length;
+        function current(){ var on = tabsWrap.querySelector('button.on'); return on ? +on.dataset.i : 0; }
+        function goTo(i){ i = (i % N + N) % N; var b = tabsWrap.querySelector('button[data-i="'+i+'"]'); if (b) b.click(); updateNow(); }
+        function prev(){ goTo(current()-1); }
+        function next(){ goTo(current()+1); }
+        function icon(dir){ return dir==='prev'
+          ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>'
+          : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>'; }
+        function mk(cls, dir){ var b=document.createElement('button'); b.className=cls+' '+dir; b.type='button'; b.setAttribute('aria-label', dir==='prev'?'Previous task':'Next task'); b.innerHTML=icon(dir); return b; }
+        ppsc.querySelectorAll('.ppsc-hero').forEach(function (hd) {
+          var l=mk('ppsc-nav-arrow','prev'), r=mk('ppsc-nav-arrow','next');
+          l.onclick=function(e){ e.stopPropagation(); prev(); };
+          r.onclick=function(e){ e.stopPropagation(); next(); };
+          hd.appendChild(l); hd.appendChild(r);
+        });
+        var wrap=document.createElement('div'); wrap.className='ppsc-tabwrap';
+        tabsWrap.parentNode.insertBefore(wrap, tabsWrap);
+        var ls=mk('ppsc-side-arrow','prev'), rs=mk('ppsc-side-arrow','next');
+        ls.onclick=prev; rs.onclick=next;
+        wrap.appendChild(ls); wrap.appendChild(tabsWrap); wrap.appendChild(rs);
+        var stage=ppsc.querySelector('.ppsc-stage');
+        var bar=document.createElement('div'); bar.className='ppsc-nowbar';
+        var bl=mk('','prev'), br=mk('','next');
+        var lbl=document.createElement('span'); lbl.className='now-label';
+        bl.onclick=prev; br.onclick=next;
+        bar.appendChild(bl); bar.appendChild(lbl); bar.appendChild(br);
+        stage.parentNode.insertBefore(bar, stage);
+        function updateNow(){ var i=current(); lbl.innerHTML = names[i] + ' <span class="now-count">'+(i+1)+' / '+N+'</span>'; }
+        tabBtns.forEach(function (b) { b.addEventListener('click', function () { setTimeout(updateNow, 0); }); });
+        var sx=null;
+        stage.addEventListener('touchstart', function(e){ sx=e.touches[0].clientX; }, {passive:true});
+        stage.addEventListener('touchend', function(e){ if(sx==null) return; var dx=e.changedTouches[0].clientX-sx;
+          if (ppsc.getAttribute('data-nav')==='c' && Math.abs(dx)>40) { dx<0?next():prev(); } sx=null; });
+        var hovering=false;
+        ppsc.addEventListener('mouseenter', function(){ hovering=true; });
+        ppsc.addEventListener('mouseleave', function(){ hovering=false; });
+        document.addEventListener('keydown', function(e){ if(!hovering) return;
+          if(e.key==='ArrowLeft'){ e.preventDefault(); prev(); } else if(e.key==='ArrowRight'){ e.preventDefault(); next(); } });
+        ppsc.setAttribute('data-nav','d');
+        updateNow();
+      })();
+      </script>
+
+            <!-- Real-World Tasks and Simulated Tasks sections commented out — the
            per-task rollout videos now live in the clickable gallery above
            (data-i 6..11), and the merged-success bar-chart figures are
            hidden along with the section headers/stat lines.
