@@ -765,7 +765,8 @@
     var baseLenS = Math.hypot(baseSx, baseSy) || 1;
     var ubx = baseSx / baseLenS, uby = baseSy / baseLenS;
     // rotDeg is the visual-CCW tilt in degrees; negate for screen y-down.
-    var rotDeg = 5 - 10 * g;
+    // 10° CCW at γ=0, 10° CW at γ=1, linear interp.
+    var rotDeg = 10 - 20 * g;
     var rotRad = -rotDeg * Math.PI / 180;
     var cR = Math.cos(rotRad), sR = Math.sin(rotRad);
     var refUx = ubx * cR - uby * sR;
@@ -788,7 +789,10 @@
           { t: 'v', i: true }, { t: 'ref', sub: true }
         ] },
       { type: 'arrow', color: ARROW_TASK_HUE,
-        parts: [{ t: 'v', i: true }, { t: 'task', sub: true }] }
+        parts: [
+          { t: 'γ · ' },
+          { t: 'v', i: true }, { t: 'task', sub: true }
+        ] }
     ]);
   };
 
