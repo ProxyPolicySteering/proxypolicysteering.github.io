@@ -770,7 +770,10 @@
       return { x: ux * c - uy * s, y: ux * s + uy * c };
     }
 
-    var BASE_CW_DEG = 15;
+    // Base CW rotation = 15° baseline + 8° extra at γ=0 that fades out as
+    // γ→1 (so the base/ref pair leans extra-clockwise when there's no task
+    // pull yet, and straightens back as steering ramps up).
+    var BASE_CW_DEG = 15 + 8 * (1 - g);
     var baseSx = baseTipOrig.x - ps.x, baseSy = baseTipOrig.y - ps.y;
     var baseLenS = Math.hypot(baseSx, baseSy) || 1;
     var rotatedBase = rotScreenCCW(baseSx / baseLenS, baseSy / baseLenS, -BASE_CW_DEG);
@@ -781,13 +784,15 @@
     var refLen = g * baseLenS;
     var refTip = { x: ps.x + refDir.x * refLen, y: ps.y + refDir.y * refLen };
 
-    var vTx = (lead.ti.x - probe.x) * GAIN;
-    var vTy = (lead.ti.y - probe.y) * GAIN;
+    // γ · v_task: direction toward the task mode, length scaled by γ (so the
+    // arrow grows from zero at γ=0 to full at γ=1, same length-logic as v_ref).
+    var vTx = (lead.ti.x - probe.x) * GAIN * g;
+    var vTy = (lead.ti.y - probe.y) * GAIN * g;
     var taskTip = tip(vTx, vTy);
 
     arrow(ctx, ps, baseTip, p.base, 2.4, 8.5);
     if (g > 0.001) arrow(ctx, ps, refTip, ARROW_REF_HUE, 2.4, 8.5);
-    arrow(ctx, ps, taskTip, ARROW_TASK_HUE, 3.0, 10.5);
+    if (g > 0.001) arrow(ctx, ps, taskTip, ARROW_TASK_HUE, 3.0, 10.5);
 
     this.legendCard(ctx, p, [
       { type: 'grad', color: p.noise, color2: ppsCol,
