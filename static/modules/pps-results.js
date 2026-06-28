@@ -18,6 +18,7 @@
   function displayName(name, baseName) { return name === 'BASE' ? baseName : name; }
 
   function buildPanel(panel, idx) {
+    var base = panel.v.BASE;  // used below to position the dashed reference line
     var card = document.createElement('div'); card.className = 'panel'; card.dataset.idx = idx;
 
     var head = document.createElement('div'); head.className = 'phead';
