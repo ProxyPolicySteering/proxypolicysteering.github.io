@@ -123,8 +123,12 @@
   .gamma-hint.show.gh-bob { animation: gh-bob 1.5s ease-in-out infinite; }
   @media (prefers-reduced-motion: reduce) { .gamma-hint.gh-bob { animation:none; } }
 
-  /* Teaser image + animated green-trajectory overlay (replaces the
-     success-rate-vs-γ plot in the right column). */
+  /* Teaser rollout video (replaces the static jeans image that used to
+     live here — see the JS block that swaps src as γ changes). The wrap
+     keeps the ORIGINAL image's aspect ratio (1280 / 855 ≈ 1.498) so the
+     displayed dimensions match what the still teaser used; the 4 : 3
+     video fills via object-fit: cover, cropping a small slice off the
+     top and bottom to fit the wider frame. */
   .teaserwrap {
     position: relative;
     line-height: 0;
@@ -132,6 +136,13 @@
     border: 1px solid var(--line);
     border-radius: 8px;
     overflow: hidden;
+    aspect-ratio: 1280 / 855;
+  }
+  .teaserwrap video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
   .teaserwrap img {
     display: block;
