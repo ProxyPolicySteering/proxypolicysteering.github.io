@@ -31,19 +31,7 @@
   /* Wrap aspect matches the cropped clips (768×576 = 4:3; sides 20% + top/
      bottom 10% trimmed) so object-fit:cover shows the whole frame. */
   .vidwrap { position: relative; line-height: 0; background: var(--bg); border: 1px solid var(--line);
-    border-radius: 8px; overflow: hidden; aspect-ratio: 4 / 3; cursor: pointer; }
-  /* "hover to play" cue — visible while the video isn't playing, fades out
-     once a rollout is playing under the cursor. */
-  .vidwrap .playcue { position: absolute; inset: 0; z-index: 3; display: flex;
-    flex-direction: column; align-items: center; justify-content: center; gap: 8px;
-    pointer-events: none; transition: opacity .15s ease; }
-  .vidwrap.playing .playcue { opacity: 0; }
-  .vidwrap .playcue .pc { width: 52px; height: 52px; border-radius: 50%;
-    background: rgba(27,27,27,0.55); display: flex; align-items: center; justify-content: center; }
-  .vidwrap .playcue .pc svg { width: 22px; height: 22px; fill: #fff; margin-left: 3px; }
-  .vidwrap .playcue .pc-label { font-family: var(--font-mono); font-size: 10.5px; line-height: 1;
-    letter-spacing: .06em; text-transform: uppercase; color: #fff;
-    background: rgba(27,27,27,0.55); padding: 4px 8px; border-radius: 6px; }
+    border-radius: 8px; overflow: hidden; aspect-ratio: 4 / 3; }
   /* Poster (first frame) + video stacked; the poster covers the brief reload
      gap while dragging so there's no black flash. The video fades in once it
      starts playing. */
@@ -103,12 +91,9 @@
     <div class="module">
       <div class="vidwrap" id="vidwrap">
         <img class="poster" id="poster" src="../steering_strength/3_0.7.jpg" alt="" aria-hidden="true">
-        <video id="teaserVideo" muted loop playsinline preload="auto"
+        <video id="teaserVideo" autoplay muted loop playsinline preload="auto"
                src="../steering_strength/3_0.7.mp4"
                aria-label="Rollout at the current steering strength"></video>
-        <div class="playcue" aria-hidden="true"><span class="pc">
-          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
-        </span><span class="pc-label">hover to play</span></div>
       </div>
       <div>
         <div class="ctl-label"><span class="k">Steering strength <span class="m"><i>γ</i></span></span><span class="v" id="gval">0.70</span></div>
@@ -137,15 +122,13 @@
     var vidwrap = document.getElementById('vidwrap');
     var posterEl = document.getElementById('poster');
     var teaserVideoEl = document.getElementById('teaserVideo');
-    var curIdx = 7;          // default src is 2_0.7 in the markup
+    var curIdx = 7;          // default src is 3_0.7 in the markup
     var idleTimer = null;
-    var hovering = false;    // the video plays ONLY while the cursor hovers it
     function labelFor(idx) { return (idx === 10) ? '1.0' : ('0.' + idx); }
-    function srcMatchesCur() { return teaserVideoEl.src.indexOf('2_' + labelFor(curIdx) + '.mp4') !== -1; }
+    function srcMatchesCur() { return teaserVideoEl.src.indexOf('3_' + labelFor(curIdx) + '.mp4') !== -1; }
 
-    // Load (if needed) and play the current rollout — but only while hovering.
+    // Load (if needed) and play the rollout for the current γ.
     function playCurrent() {
-      if (!hovering) return;
       if (!srcMatchesCur()) teaserVideoEl.src = '../steering_strength/3_' + labelFor(curIdx) + '.mp4';
       var pr = teaserVideoEl.play();
       if (pr && pr.catch) pr.catch(function () {});
@@ -160,27 +143,18 @@
       // Instant: swap the poster image and hide the (now-stale) video.
       posterEl.src = '../steering_strength/3_' + labelFor(idx) + '.jpg';
       vidwrap.classList.remove('playing');
-      // Debounced: only (re)play once the slider settles — and only if hovering.
+      // Debounced: auto-play the matching clip once the slider is idle 500 ms.
       if (idleTimer) clearTimeout(idleTimer);
       idleTimer = setTimeout(playCurrent, 500);
     }
-    // Reveal the video (fade over the poster) only once it's actually playing,
-    // still hovering, and it matches the current slider position.
+    // Reveal the video (fade over the poster) once it's actually playing and
+    // still matches the current slider position.
     function revealIfCurrent() {
-      if (hovering && srcMatchesCur()) vidwrap.classList.add('playing');
+      if (srcMatchesCur()) vidwrap.classList.add('playing');
     }
     teaserVideoEl.addEventListener('playing', revealIfCurrent);
     teaserVideoEl.addEventListener('loadeddata', function () {
       if (!teaserVideoEl.paused) revealIfCurrent();
-    });
-
-    // Hover gating: play on enter, pause + show poster on leave.
-    vidwrap.addEventListener('mouseenter', function () { hovering = true; playCurrent(); });
-    vidwrap.addEventListener('mouseleave', function () {
-      hovering = false;
-      if (idleTimer) clearTimeout(idleTimer);
-      teaserVideoEl.pause();
-      vidwrap.classList.remove('playing');
     });
 
     // Preload every poster so dragging swaps them instantly (no image flash).
