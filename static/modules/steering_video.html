@@ -28,9 +28,10 @@
   .module { background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
     box-shadow: var(--shadow); padding: 20px 20px 22px; display: flex; flex-direction: column; gap: 16px; }
 
-  /* Wrap aspect matches the full uncropped source clips (1280×720, 16:9). */
+  /* Wrap aspect matches the cropped clips (768×576 = 4:3; sides 20% + top/
+     bottom 10% trimmed) so object-fit:cover shows the whole frame. */
   .vidwrap { position: relative; line-height: 0; background: var(--bg); border: 1px solid var(--line);
-    border-radius: 8px; overflow: hidden; aspect-ratio: 16 / 9; cursor: pointer; }
+    border-radius: 8px; overflow: hidden; aspect-ratio: 4 / 3; cursor: pointer; }
   /* "hover to play" cue — visible while the video isn't playing, fades out
      once a rollout is playing under the cursor. */
   .vidwrap .playcue { position: absolute; inset: 0; z-index: 3; display: flex;
@@ -101,9 +102,9 @@
   <div class="wrap">
     <div class="module">
       <div class="vidwrap" id="vidwrap">
-        <img class="poster" id="poster" src="../steering_strength/2_0.7.jpg" alt="" aria-hidden="true">
+        <img class="poster" id="poster" src="../steering_strength/3_0.7.jpg" alt="" aria-hidden="true">
         <video id="teaserVideo" muted loop playsinline preload="auto"
-               src="../steering_strength/2_0.7.mp4"
+               src="../steering_strength/3_0.7.mp4"
                aria-label="Rollout at the current steering strength"></video>
         <div class="playcue" aria-hidden="true"><span class="pc">
           <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
@@ -129,7 +130,7 @@
     function fmt(g){ return g.toFixed(2); }
 
     /* Eleven pre-rendered rollout clips (+ first-frame poster JPGs) in
-       ../steering_strength/ at γ = 0.0, 0.1, …, 1.0 (2_<gamma>.mp4/.jpg).
+       ../steering_strength/ at γ = 0.0, 0.1, …, 1.0 (3_<gamma>.mp4/.jpg).
        To avoid the black flicker caused by reloading <video> on every drag
        step, we show the matching poster IMAGE instantly while dragging, and
        only load + play the video once the slider has been idle for 500 ms. */
@@ -145,7 +146,7 @@
     // Load (if needed) and play the current rollout — but only while hovering.
     function playCurrent() {
       if (!hovering) return;
-      if (!srcMatchesCur()) teaserVideoEl.src = '../steering_strength/2_' + labelFor(curIdx) + '.mp4';
+      if (!srcMatchesCur()) teaserVideoEl.src = '../steering_strength/3_' + labelFor(curIdx) + '.mp4';
       var pr = teaserVideoEl.play();
       if (pr && pr.catch) pr.catch(function () {});
     }
@@ -157,7 +158,7 @@
       if (idx === curIdx) return;
       curIdx = idx;
       // Instant: swap the poster image and hide the (now-stale) video.
-      posterEl.src = '../steering_strength/2_' + labelFor(idx) + '.jpg';
+      posterEl.src = '../steering_strength/3_' + labelFor(idx) + '.jpg';
       vidwrap.classList.remove('playing');
       // Debounced: only (re)play once the slider settles — and only if hovering.
       if (idleTimer) clearTimeout(idleTimer);
@@ -183,7 +184,7 @@
     });
 
     // Preload every poster so dragging swaps them instantly (no image flash).
-    for (var pi = 0; pi <= 10; pi++) { var im = new Image(); im.src = '../steering_strength/2_' + labelFor(pi) + '.jpg'; }
+    for (var pi = 0; pi <= 10; pi++) { var im = new Image(); im.src = '../steering_strength/3_' + labelFor(pi) + '.jpg'; }
 
     gammaEl.addEventListener('input', function () {
       document.getElementById('gval').textContent = fmt(parseFloat(this.value));
