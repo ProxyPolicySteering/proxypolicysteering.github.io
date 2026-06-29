@@ -876,6 +876,10 @@
              alt="Three bar charts — Real-world, Simulation, and π0 transfer — comparing average success rates of π0.5 base, Specialist, Residual, DSRL, LoRA, and PPS. PPS leads every panel.">
       </figure>
 
+      <!-- Real-World Tasks + Simulated Tasks per-task video grids and the two
+           merged per-task bar-chart figures commented out — the three-panel
+           summary chart above and the Baseline Comparison carousel below cover
+           these now.
             <div class="subheader">Real-World Tasks</div>
       <p class="stat-line">
         <strong>+53% absolute success</strong> over the
@@ -964,6 +968,7 @@
         <img src="./static/images/sim_results_merged_web.png"
              alt="Simulation per-task success rate across models, with the average column at the right">
       </figure>
+      -->
 
       <!-- ADDED: baseline comparison carousel -->
       <div class="subheader">Baseline Comparison</div>
@@ -1037,21 +1042,34 @@
           .ppsc-hero .ppsc-overlay-text { font-size:30px; }
           .ppsc-item .ppsc-overlay-text { font-size:15px; padding:0 10px; }
         }
-        /* Speed badge — same look as the recovery section's "2X" pill. */
-        .ppsc-speed-badge { position:absolute; top:10px; right:10px;
+        /* Speed badge — same chip style as the method-name tag (Inter 700,
+           15px / 16px on hero, pill shape), kept on a neutral dark fill
+           since "2X" isn't a method. */
+        .ppsc-speed-badge { position:absolute; top:14px; right:14px;
+          display:inline-flex; align-items:center;
           font-family:'Inter','Helvetica Neue',Arial,sans-serif;
-          font-size:13px; font-weight:600; line-height:1; color:#fdfaf4;
-          background:rgba(27,27,27,0.72); padding:4px 8px; border-radius:6px;
-          letter-spacing:0.5px; pointer-events:none; z-index:2; }
+          font-size:15px; font-weight:700; line-height:1; color:#fff;
+          background:rgba(27,27,27,0.72); padding:6px 12px; border-radius:999px;
+          letter-spacing:0; pointer-events:none; z-index:2; }
+        .ppsc-hero .ppsc-speed-badge { font-size:16px; padding:7px 13px; }
         /* Persistent caption chip (PI's Robust-Execution style): the outcome
            text sits permanently in the bottom-right corner so readers get
            unlimited reading time. Shown only when .ppsc has .cap-persistent;
            in that mode the end-of-clip fade veil is disabled. */
-        .ppsc-caption { position:absolute; right:8px; bottom:8px; z-index:3; display:none;
+        /* Persistent outcome chips (Success / failure reasons) — same chip
+           style as the method-name tag: Inter 700, 15px (16px on hero), white
+           text, pill shape, coloured by method. The "Success" (pps) chip is
+           the exception: a more square-ish shape instead of the full pill. */
+        .ppsc-caption { position:absolute; right:14px; bottom:14px; z-index:3; display:none;
           max-width:82%; text-align:right;
-          font-family:'Inter','Helvetica Neue',Arial,sans-serif; font-size:15px; font-weight:600; line-height:1.3;
-          color:#fdfaf4; background:rgba(27,27,27,0.72); padding:5px 9px; border-radius:6px; letter-spacing:0.2px; }
-        .ppsc-hero .ppsc-caption { font-size:17px; }
+          font-family:'Inter','Helvetica Neue',Arial,sans-serif; font-size:15px; font-weight:700; line-height:1.25;
+          color:#fff; background:rgba(27,27,27,0.72); padding:6px 12px; border-radius:999px; letter-spacing:0; }
+        .ppsc-hero .ppsc-caption { font-size:16px; padding:7px 13px; }
+        .ppsc-caption.base { background:var(--ppsc-base); }
+        .ppsc-caption.lora { background:var(--ppsc-lora); }
+        .ppsc-caption.spec { background:var(--ppsc-spec); }
+        .ppsc-caption.dsrl { background:var(--ppsc-dsrl); }
+        .ppsc-caption.pps  { background:var(--ppsc-pps); border-radius:8px; }
         .ppsc.cap-persistent .ppsc-caption { display:inline-block; }
         .ppsc.cap-persistent .ppsc-overlay { display:none; }
         /* Version 3 — failure-type: persistent chip, colour-coded by the paper's
@@ -1077,13 +1095,6 @@
         .ppsc-capseg button.on { background:var(--ppsc-panel); color:var(--ppsc-ink); box-shadow:0 1px 2px rgba(40,32,16,0.08); }
       </style>
       <div class="ppsc">
-        <div class="ppsc-capmode">Caption style
-          <div class="ppsc-capseg" id="ppsc-capseg">
-            <button data-cap="overlay" class="on">At end</button>
-            <button data-cap="persistent">Persistent</button>
-            <button data-cap="ftype">Failure type</button>
-          </div>
-        </div>
         <div class="ppsc-tabs" id="ppsc-tabs">
           <button class="on" data-i="0">Coffee Brewing</button>
           <button data-i="1">Flower Insertion</button>
@@ -1263,7 +1274,9 @@
         // (default 2.0). Browsers reset playbackRate on (re)load and on
         // seek/play in some cases, so we re-apply on every relevant event.
         document.querySelectorAll('.ppsc video').forEach(function (v) {
-          v.loop = false; // belt-and-suspenders in case the attribute is restored elsewhere
+          // Persistent captions are always visible, so just loop smoothly
+          // instead of freezing on the last frame for the (now hidden) overlay.
+          v.loop = true;
           var rate = parseFloat(v.dataset.speed) || 2.0;
           var setRate = function () { v.playbackRate = rate; };
           setRate();
@@ -1391,26 +1404,9 @@
           chip.textContent = t.textContent;
           holder.appendChild(chip);
         });
-        // failure-type legend (shown only in the "Failure type" mode)
-        var legend = document.createElement('div');
-        legend.className = 'ppsc-ftlegend';
-        legend.innerHTML =
-          '<span><i style="background:var(--ft-incorrect)"></i>Incorrect mode</span>' +
-          '<span><i style="background:var(--ft-ood)"></i>OOD state</span>' +
-          '<span><i style="background:var(--ft-imprecise)"></i>Imprecise execution</span>';
-        ppsc.querySelector('.ppsc-stage').appendChild(legend);
-        // default mode = overlay (the PI compares against this)
-        ppsc.classList.add('cap-overlay');
-        var seg = document.getElementById('ppsc-capseg');
-        seg.querySelectorAll('button').forEach(function (b) {
-          b.addEventListener('click', function () {
-            var mode = b.dataset.cap;
-            ['overlay', 'persistent', 'ftype'].forEach(function (m) {
-              ppsc.classList.toggle('cap-' + m, m === mode);
-            });
-            seg.querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x === b); });
-          });
-        });
+        // Persistent caption chips are the only caption mode now — the
+        // "At end" / "Failure type" toggle and its legend were removed.
+        ppsc.classList.add('cap-persistent');
       })();
       </script>
 
