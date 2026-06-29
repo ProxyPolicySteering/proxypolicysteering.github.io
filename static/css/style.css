@@ -443,8 +443,8 @@ header {
    .ppsc-tag style from the baseline-comparison carousel. */
 .recovery-tag {
   position: absolute;
-  left: 12px;
-  top: 12px;
+  left: 14px;
+  top: 14px;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -454,7 +454,7 @@ header {
   font-weight: 700;
   color: #fff;
   padding: 6px 12px;
-  border-radius: 999px;
+  border-radius: 8px;
   z-index: 2;
   pointer-events: none;
 }
@@ -479,17 +479,17 @@ header {
 
 .recovery-badge {
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: 14px;
+  right: 14px;
   font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 700;
   line-height: 1;
-  color: #fdfaf4;
-  background: rgba(27, 27, 27, 0.72);
-  padding: 4px 8px;
-  border-radius: 6px;
-  letter-spacing: 0.5px;
+  color: #fff;
+  background: #1b1b1b;
+  padding: 6px 12px;
+  border-radius: 8px;
+  letter-spacing: 0;
   pointer-events: none;
 }
 
@@ -540,17 +540,17 @@ header {
 /* Modality label overlay (e.g. "point cloud", "audio") on cross-mod cells. */
 .crossmod-tag {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 14px;
+  right: 14px;
   font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 700;
   line-height: 1;
-  color: #fdfaf4;
-  background: rgba(27, 27, 27, 0.72);
-  padding: 5px 9px;
-  border-radius: 6px;
-  letter-spacing: 0.4px;
+  color: #fff;
+  background: #1b1b1b;
+  padding: 6px 12px;
+  border-radius: 8px;
+  letter-spacing: 0;
   pointer-events: none;
   z-index: 4;
 }
@@ -560,18 +560,18 @@ header {
    input column, green for the "Steered Policy Rollout" output column. */
 .crossmod-role-tag {
   position: absolute;
-  left: 12px;
-  top: 12px;
+  left: 14px;
+  top: 14px;
   display: inline-flex;
   align-items: center;
   gap: 6px;
   font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
-  font-size: 12.5px;
+  font-size: 15px;
   line-height: 1;
   font-weight: 700;
   color: #fff;
-  padding: 5px 11px;
-  border-radius: 999px;
+  padding: 6px 12px;
+  border-radius: 8px;
   z-index: 3;
   pointer-events: none;
 }
