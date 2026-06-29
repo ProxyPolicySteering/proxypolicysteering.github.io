@@ -1270,8 +1270,15 @@
             var on = +p.dataset.i === i;
             p.classList.toggle('on', on);
             p.querySelectorAll('video').forEach(function (v) {
-              if (on) { var pr = v.play(); if (pr && pr.catch) pr.catch(function () {}); }
-              else { v.pause(); }
+              if (on) {
+                // Always restart the selected task's clips from the beginning.
+                try { v.currentTime = 0; } catch (e) {}
+                v.playbackRate = parseFloat(v.dataset.speed) || 2.0;
+                var pr = v.play(); if (pr && pr.catch) pr.catch(function () {});
+              } else {
+                v.pause();
+                try { v.currentTime = 0; } catch (e) {}
+              }
             });
           });
         }
