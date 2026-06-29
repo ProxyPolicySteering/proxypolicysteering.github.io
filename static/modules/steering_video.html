@@ -32,6 +32,11 @@
      bottom 10% trimmed) so object-fit:cover shows the whole frame. */
   .vidwrap { position: relative; line-height: 0; background: var(--bg); border: 1px solid var(--line);
     border-radius: 8px; overflow: hidden; aspect-ratio: 4 / 3; }
+  /* Subtask label overlaid on the rollout, top-left. */
+  .vidwrap .vidtask { position: absolute; top: 12px; left: 12px; z-index: 4;
+    font: 700 14px/1 var(--font-original); color: #fff;
+    background: rgba(27,27,27,0.62); padding: 6px 11px; border-radius: 6px;
+    letter-spacing: 0.2px; pointer-events: none; }
   /* Poster (first frame) + video stacked; the poster covers the brief reload
      gap while dragging so there's no black flash. The video fades in once it
      starts playing. */
@@ -90,14 +95,15 @@
   <div class="wrap">
     <div class="module">
       <div class="vidwrap" id="vidwrap">
-        <img class="poster" id="poster" src="../steering_strength/3_0.7.jpg" alt="" aria-hidden="true">
+        <img class="poster" id="poster" src="../steering_strength/3_0.0.jpg" alt="" aria-hidden="true">
         <video id="teaserVideo" autoplay muted loop playsinline preload="auto"
-               src="../steering_strength/3_0.7.mp4"
+               src="../steering_strength/3_0.0.mp4"
                aria-label="Rollout at the current steering strength"></video>
+        <span class="vidtask">Open the lid</span>
       </div>
       <div>
-        <div class="ctl-label"><span class="k">Steering strength <span class="m"><i>γ</i></span></span><span class="v" id="gval">0.70</span></div>
-        <input id="gamma" type="range" min="0" max="1.0" step="0.01" value="0.7" />
+        <div class="ctl-label"><span class="k">Steering strength <span class="m"><i>γ</i></span></span><span class="v" id="gval">0.00</span></div>
+        <input id="gamma" type="range" min="0" max="1.0" step="0.01" value="0" />
         <div class="ticks"><span>0</span><span>1</span></div>
       </div>
       <div class="teaser-legend" aria-label="Trajectory colours">
@@ -122,7 +128,7 @@
     var vidwrap = document.getElementById('vidwrap');
     var posterEl = document.getElementById('poster');
     var teaserVideoEl = document.getElementById('teaserVideo');
-    var curIdx = 7;          // default src is 3_0.7 in the markup
+    var curIdx = 0;          // default src is 3_0.0 in the markup
     var idleTimer = null;
     function labelFor(idx) { return (idx === 10) ? '1.0' : ('0.' + idx); }
     function srcMatchesCur() { return teaserVideoEl.src.indexOf('3_' + labelFor(curIdx) + '.mp4') !== -1; }
