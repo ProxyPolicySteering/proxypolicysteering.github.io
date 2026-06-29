@@ -54,8 +54,10 @@
   .ctl-label { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
   .ctl-label .k { font-size: 15px; font-weight: 600; }
   .ctl-label .v { font-family: var(--font-mono); font-size: 15px; color: var(--resid); font-weight: 500; }
-  input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 4px;
-    background: var(--line); border-radius: 99px; outline: none; margin: 6px 0 2px; }
+  /* Slightly inset/shortened track so the "Try me" pill (anchored to the thumb)
+     doesn't overflow the module edge at γ=0 / γ=1. */
+  input[type=range] { -webkit-appearance: none; appearance: none; width: calc(100% - 56px); height: 4px;
+    background: var(--line); border-radius: 99px; outline: none; margin: 6px auto 2px; display: block; }
   input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none;
     width: 18px; height: 18px; border-radius: 50%; background: var(--resid);
     border: 3px solid var(--panel); box-shadow: var(--shadow); cursor: pointer; }
@@ -195,7 +197,7 @@
       pill.innerHTML = '<svg class="gh-cursor" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 2.5l15.5 8.2-6.6 1.6-1.9 6.6z"/></svg><span>' + ('ontouchstart' in window ? 'Drag me' : 'Try me') + '</span>';
       wrap.appendChild(pill);
       var RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches, dismissed = false, wiggled = false;
-      function place(){ var lo=parseFloat(gammaEl.min),hi=parseFloat(gammaEl.max),v=parseFloat(gammaEl.value),f=(v-lo)/(hi-lo),w=gammaEl.clientWidth,t=18; pill.style.left=(t/2+f*(w-t))+'px'; }
+      function place(){ var lo=parseFloat(gammaEl.min),hi=parseFloat(gammaEl.max),v=parseFloat(gammaEl.value),f=(v-lo)/(hi-lo),w=gammaEl.clientWidth,t=18; pill.style.left=(gammaEl.offsetLeft+t/2+f*(w-t))+'px'; }
       function show(){ place(); pill.classList.add('show'); if(!RM) pill.classList.add('gh-bob'); }
       function dismiss(){ if(dismissed)return; dismissed=true; pill.classList.remove('show','gh-bob'); }
       gammaEl.addEventListener('input', place); window.addEventListener('resize', place);
