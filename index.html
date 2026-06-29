@@ -1007,7 +1007,7 @@
         .ppsc-hero video { display:block; width:100%; aspect-ratio:16/9; object-fit:cover;
           background:#000; border-radius:12px; border:2px solid var(--ppsc-line); }
         .ppsc-tag { position:absolute; left:14px; top:14px; display:inline-flex; align-items:center; gap:6px;
-          font-size:15px; line-height:1; font-weight:700; color:#fff; padding:6px 12px; border-radius:999px; }
+          font-size:15px; line-height:1; font-weight:700; color:#fff; padding:6px 12px; border-radius:8px; }
         .ppsc-hero .ppsc-tag { font-size:16px; padding:7px 13px; }
         .ppsc-tag.pps { background:var(--ppsc-pps); } .ppsc-tag.base { background:var(--ppsc-base); } .ppsc-tag.lora { background:var(--ppsc-lora); } .ppsc-tag.spec { background:var(--ppsc-spec); } .ppsc-tag.dsrl { background:var(--ppsc-dsrl); }
         .ppsc-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:14px; }
@@ -1053,27 +1053,23 @@
           display:inline-flex; align-items:center;
           font-family:'Inter','Helvetica Neue',Arial,sans-serif;
           font-size:15px; font-weight:700; line-height:1; color:#fff;
-          background:rgba(27,27,27,0.72); padding:6px 12px; border-radius:999px;
+          background:#1b1b1b; padding:6px 12px; border-radius:8px;
           letter-spacing:0; pointer-events:none; z-index:2; }
         .ppsc-hero .ppsc-speed-badge { font-size:16px; padding:7px 13px; }
-        /* Persistent caption chip (PI's Robust-Execution style): the outcome
-           text sits permanently in the bottom-right corner so readers get
-           unlimited reading time. Shown only when .ppsc has .cap-persistent;
-           in that mode the end-of-clip fade veil is disabled. */
-        /* Persistent outcome chips (Success / failure reasons) — same chip
-           style as the method-name tag: Inter 700, 15px (16px on hero), white
-           text, pill shape, coloured by method. The "Success" (pps) chip is
-           the exception: a more square-ish shape instead of the full pill. */
+        /* Persistent outcome chips (Success / failure reasons) sit permanently
+           in the bottom-right corner. Same chip style as the method-name tag
+           and the 2X badge: Inter 700, 15px (16px on hero), white text, solid
+           fill, square-ish 8px corners; coloured by method. */
         .ppsc-caption { position:absolute; right:14px; bottom:14px; z-index:3; display:none;
           max-width:82%; text-align:right;
           font-family:'Inter','Helvetica Neue',Arial,sans-serif; font-size:15px; font-weight:700; line-height:1.25;
-          color:#fff; background:rgba(27,27,27,0.72); padding:6px 12px; border-radius:999px; letter-spacing:0; }
+          color:#fff; background:#1b1b1b; padding:6px 12px; border-radius:8px; letter-spacing:0; }
         .ppsc-hero .ppsc-caption { font-size:16px; padding:7px 13px; }
         .ppsc-caption.base { background:var(--ppsc-base); }
         .ppsc-caption.lora { background:var(--ppsc-lora); }
         .ppsc-caption.spec { background:var(--ppsc-spec); }
         .ppsc-caption.dsrl { background:var(--ppsc-dsrl); }
-        .ppsc-caption.pps  { background:var(--ppsc-pps); border-radius:8px; }
+        .ppsc-caption.pps  { background:var(--ppsc-pps); }
         .ppsc.cap-persistent .ppsc-caption { display:inline-block; }
         .ppsc.cap-persistent .ppsc-overlay { display:none; }
         /* Version 3 — failure-type: persistent chip, colour-coded by the paper's
