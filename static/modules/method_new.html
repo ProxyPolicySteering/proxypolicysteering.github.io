@@ -232,12 +232,6 @@
             <input id="gamma" type="range" min="0" max="1.0" step="0.01" value="0.7" />
             <div class="ticks"><span>0</span><span>1</span></div>
           </div>
-          <div class="teaserwrap">
-            <video id="teaserVideo" autoplay muted loop playsinline preload="auto"
-                   src="../steering_strength/2_0.7.mp4"
-                   aria-label="Rollout at the current steering strength"></video>
-            <span class="cnote">Real rollout</span>
-          </div>
           <div class="teaser-legend" aria-label="Trajectory colours">
             <span class="leg-item"><span class="leg-swatch" style="background:#AF56BF"></span>base action</span>
             <span class="leg-item"><span class="leg-swatch" style="background:#F58A45"></span>ref action</span>
@@ -271,39 +265,15 @@
     diag.gamma = parseFloat(gammaEl.value);
     function fmt(g){ return g.toFixed(2); }
 
-    /* ----- Teaser rollout video -------------------------------------
-       Eleven pre-rendered rollout clips live in ../steering_strength/
-       at γ = 0.0, 0.1, …, 1.0 (file names 2_<gamma>.mp4). The slider
-       snaps to the nearest 0.1 and we swap the <video> src so the
-       displayed rollout matches the steering strength. Cropped to
-       768×576 (left/right 20 %, top/bottom 10 %) ahead of time so the
-       robot fills the frame. */
-    var teaserVideoEl = document.getElementById('teaserVideo');
-    var teaserVideoIdx = 7;  // default src is 2_0.7.mp4 in the markup
-    function syncTeaser() {
-      var g = parseFloat(gammaEl.value);
-      var idx = Math.round(g * 10);
-      if (idx < 0) idx = 0; else if (idx > 10) idx = 10;
-      if (idx === teaserVideoIdx) return;
-      teaserVideoIdx = idx;
-      var label = (idx === 10) ? '1.0' : ('0.' + idx);
-      teaserVideoEl.src = '../steering_strength/2_' + label + '.mp4';
-      var pr = teaserVideoEl.play();
-      if (pr && pr.catch) pr.catch(function () {});
-    }
-
-    // Initial render — fires once on script load; the actual video <src>
-    // is already correct for the slider's default γ (0.7), so syncTeaser()
-    // here is mostly a no-op unless the default ever drifts.
-    syncTeaser();
-
-    /* ----- Slider drives BOTH the diagram and the teaser overlay ----- */
+    /* ----- Slider drives the distribution diagram + equation display.
+       The rollout video that used to live here was split out into a
+       separate module (steering_video.html) shown in the Effective
+       Steering section. ----- */
     gammaEl.addEventListener('input', function () {
       var g = parseFloat(this.value);
       diag.gamma = g;
       document.getElementById('gval').textContent = fmt(g);
       document.getElementById('eqg').textContent = fmt(g);
-      syncTeaser();
     });
 
     /* γ slider "Try me" hint: bobbing pill on the thumb + one auto-wiggle */

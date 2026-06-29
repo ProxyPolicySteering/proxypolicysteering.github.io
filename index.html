@@ -844,7 +844,7 @@
       <!-- Single-path interactive steering diagram. Subheader + description
            removed; the iframe carries the explanation itself. -->
       <div class="pps-embed-block">
-        <iframe class="pps-embed-frame" data-embed src="./static/modules/method_new.html?v=21"
+        <iframe class="pps-embed-frame" data-embed src="./static/modules/method_new.html?v=22"
                 title="Interactive method diagram (single-path variant)" scrolling="no" loading="lazy"></iframe>
       </div>
     </section>
@@ -1374,6 +1374,18 @@
         ppsc.classList.add('cap-persistent');
       })();
       </script>
+
+      <!-- Steering-strength rollout (split out of the Method-section widget):
+           drag γ to watch a real rollout change. -->
+      <div class="subheader">See it on a real rollout</div>
+      <p>
+        Drag the steering strength <span class="math"><span class="var">&gamma;</span></span>
+        and watch a real PPS rollout shift from base-like behavior toward the task.
+      </p>
+      <div class="pps-embed-block">
+        <iframe class="pps-embed-frame" data-embed src="./static/modules/steering_video.html?v=1"
+                title="Real rollout vs. steering strength" scrolling="no" loading="lazy"></iframe>
+      </div>
 
     </section>
 
