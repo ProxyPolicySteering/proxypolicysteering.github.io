@@ -378,6 +378,17 @@
         }
         .tih-act-frame.video-on .tih-act-video { opacity: 1; }
         .tih-act-frame.video-on img { opacity: 0; }
+        /* State label (S_in / S_out / S_both) top-left of each rollout image. */
+        .tih-act-state {
+          position: absolute;
+          top: 8px; left: 8px; z-index: 4;
+          font-family: 'Inter','Helvetica Neue',Arial,sans-serif;
+          font-size: 14px; font-weight: 700; color: #fff;
+          background: rgba(20,20,20,0.66); padding: 4px 9px; border-radius: 6px;
+          line-height: 1; pointer-events: none;
+        }
+        .tih-act-state i { font-style: italic; }
+        .tih-act-state sub { font-style: normal; font-size: 0.72em; font-weight: 600; vertical-align: -0.15em; }
         .tih-act-banner {
           position: absolute;
           left: 0; right: 0; bottom: 0;
@@ -512,6 +523,7 @@
             <div class="tih-act-frame">
               <img src="./static/teaser_web/teaser_1_final_action.jpg" alt="rollout 1">
               <video class="tih-act-video" src="./static/teaser_web/1_web.mp4" muted loop playsinline preload="metadata"></video>
+              <span class="tih-act-state"><i>S</i><sub>in</sub></span>
               <div class="tih-act-banner">State within task distribution</div>
             </div>
             <div class="tih-act-caption">Novel task behavior</div>
@@ -520,6 +532,7 @@
             <div class="tih-act-frame">
               <img src="./static/teaser_web/teaser_2_final_action.jpg" alt="rollout 2">
               <video class="tih-act-video" src="./static/teaser_web/2_web.mp4" muted loop playsinline preload="metadata"></video>
+              <span class="tih-act-state"><i>S</i><sub>out</sub></span>
               <div class="tih-act-banner">State outside task distribution</div>
             </div>
             <div class="tih-act-caption">Recovery via base prior</div>
@@ -528,6 +541,7 @@
             <div class="tih-act-frame">
               <img src="./static/teaser_web/teaser_3_final_action.jpg" alt="rollout 3">
               <video class="tih-act-video" src="./static/teaser_web/3_web.mp4" muted loop playsinline preload="metadata"></video>
+              <span class="tih-act-state"><i>S</i><sub>both</sub></span>
               <div class="tih-act-banner">State within task and base distribution</div>
             </div>
             <div class="tih-act-caption">Agreement reached</div>
@@ -547,12 +561,24 @@
             im.src = './static/teaser_web/fm_' + kind + '_' + i + '.png';
           });
         });
+        // Distribution caption labels and the S-argument per active panel.
+        var DIST_LABELS = { base: 'base', ref: 'ref', task: 'task', pps: 'PPS' };
+        var STATE_ARG = { 1: 'in', 2: 'out', 3: 'both' };
+        function updateDistCaptions(i) {
+          var arg = STATE_ARG[i] || 'in';
+          Object.keys(DIST_LABELS).forEach(function (kind) {
+            var el = root.querySelector('.tih-dist-caption.' + kind);
+            if (el) el.innerHTML = '<i>&pi;</i><sub>' + DIST_LABELS[kind] +
+              '</sub>(<i>S</i><sub>' + arg + '</sub>)';
+          });
+        }
         function activate(i) {
           acts.forEach(function (a) { a.classList.toggle('active', +a.dataset.i === i); });
           dists.forEach(function (img) {
             img.src = './static/teaser_web/fm_' + img.dataset.kind + '_' + i + '.png';
           });
           updateArrows(i);
+          updateDistCaptions(i);
         }
         // Hover an action: swap the distribution row to this variant AND
         // play its rollout video as a loop. Leaving the action snaps the
