@@ -738,7 +738,7 @@
         // Auto-rotate which panel floats every 2 s while the cursor is NOT
         // over the figure. Hovering pauses it (hover drives the active panel);
         // leaving the figure resumes from wherever it was.
-        var ROTATE_MS = 2000;
+        var ROTATE_MS = 3000;
         var rotateTimer = null;
         var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         function currentActive() { var a = root.querySelector('.tih-act.active'); return a ? +a.dataset.i : 1; }
@@ -774,7 +774,9 @@
         .tih-hint-pill .hint-cursor { width: 15px; height: 15px; flex: 0 0 auto; color: #4f9d5d; }
         /* The "Try me" pill stays visible (kept on purpose); panels are drawn
            attention to by the 2 s auto-rotation instead of a glow pulse. */
-        .tih-hint-pill { opacity: 1; }
+        .tih-hint-pill { opacity: 1; transition: opacity .3s ease; }
+        /* Pill fades out the first time the cursor lands on a rollout image. */
+        .tih.tih-hinted .tih-hint-pill { opacity: 0; }
         @keyframes tih-bob { 0%,100% { transform: var(--bob) translateY(0); } 50% { transform: var(--bob) translateY(-5px); } }
         @media (prefers-reduced-motion: reduce) {
           .tih-hint-pill { animation: none !important; }
@@ -794,7 +796,11 @@
         pill.innerHTML = '<svg class="hint-cursor" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 2.5l15.5 8.2-6.6 1.6-1.9 6.6z"/></svg><span class="hint-text">' + (touch ? 'Tap me' : 'Try me') + '</span>';
         actRow.appendChild(pill);
 
-        // The "Try me" pill is kept persistent — no dismiss-on-hover.
+        // Dismiss the "Try me" pill the first time the cursor lands on a
+        // rollout image (any action frame).
+        tih.querySelectorAll('.tih-act-frame').forEach(function (fr) {
+          fr.addEventListener('mouseenter', function () { tih.classList.add('tih-hinted'); });
+        });
 
         // touch: tap switches panels (reuse the core mouseenter/leave logic)
         var lastTap = null;
@@ -804,6 +810,7 @@
             if (lastTap && lastTap !== a) lastTap.dispatchEvent(new MouseEvent('mouseleave', { bubbles: true }));
             a.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
             lastTap = a;
+            tih.classList.add('tih-hinted');
           });
         });
       })();
