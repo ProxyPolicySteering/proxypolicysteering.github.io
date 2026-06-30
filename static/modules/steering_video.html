@@ -121,7 +121,7 @@
         </div>
       </div>
       <div>
-        <div class="ctl-label"><span class="k">Steering strength <span class="m"><i>γ</i></span></span><span class="v" id="gval">0.00</span></div>
+        <div class="ctl-label"><span class="k">Steering strength <span class="m"><i>γ</i></span></span><span class="v" id="gval">0.0</span></div>
         <input id="gamma" type="range" min="0" max="1.0" step="0.01" value="0" />
       </div>
       <div class="teaser-legend" aria-label="Trajectory colours">
@@ -136,7 +136,7 @@
   <script src="pps-embed.js"></script>
   <script>
     var gammaEl = document.getElementById('gamma');
-    function fmt(g){ return g.toFixed(2); }
+    function fmt(g){ return g.toFixed(1); }
 
     /* Two parallel rollout sets, each 11 pre-rendered clips (+ first-frame
        poster JPGs) at γ = 0.0, 0.1, …, 1.0:
