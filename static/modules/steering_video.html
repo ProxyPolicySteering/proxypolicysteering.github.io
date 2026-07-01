@@ -42,6 +42,17 @@
     font: 700 15px/1 var(--font-original); color: #fff;
     background: rgba(27, 27, 27, 0.7); padding: 6px 12px; border-radius: 8px;
     letter-spacing: 0; pointer-events: none; }
+  /* Outcome badge, bottom-right — same solid-dark chip as the subtask tag, but
+     coloured like the carousel's "Success" label: green ✓ for a success, red ✗
+     for a failure. Icon + text share the outcome colour. */
+  .vidwrap .vidout { position: absolute; bottom: 14px; right: 14px; z-index: 4;
+    display: inline-flex; align-items: center; gap: 7px; max-width: 84%;
+    font: 700 15px/1 var(--font-original); text-align: right;
+    background: rgba(27, 27, 27, 0.7); padding: 6px 12px; border-radius: 8px;
+    letter-spacing: 0; pointer-events: none; }
+  .vidwrap .vidout svg { width: 15px; height: 15px; flex: 0 0 auto; display: block; }
+  .vidwrap .vidout.ok  { color: #5fd07a; }
+  .vidwrap .vidout.bad { color: #f0846a; }
   /* Poster (first frame) + video stacked; the poster covers the brief reload
      gap while dragging so there's no black flash. The video fades in once it
      starts playing. */
@@ -111,6 +122,7 @@
                  src="../steering_strength/capsule/3_0.0.mp4"
                  aria-label="Capsule rollout at the current steering strength"></video>
           <span class="vidtask">Open the lid</span>
+          <span class="vidout"></span>
         </div>
         <div class="vidwrap" data-dir="fruit">
           <img class="poster" src="../steering_strength/fruit/3_0.0.jpg" alt="" aria-hidden="true">
@@ -118,6 +130,7 @@
                  src="../steering_strength/fruit/3_0.0.mp4"
                  aria-label="Fruit rollout at the current steering strength"></video>
           <span class="vidtask">Weigh the fruit</span>
+          <span class="vidout"></span>
         </div>
       </div>
       <div>
@@ -147,8 +160,32 @@
        only load + play the videos once the slider has been idle for 500 ms. */
     // Two rollout panels (capsule + fruit) driven by the one shared slider.
     var sets = Array.prototype.map.call(document.querySelectorAll('.vidwrap[data-dir]'), function (w) {
-      return { wrap: w, dir: w.dataset.dir, poster: w.querySelector('img.poster'), video: w.querySelector('video') };
+      return { wrap: w, dir: w.dataset.dir, poster: w.querySelector('img.poster'),
+               video: w.querySelector('video'), out: w.querySelector('.vidout') };
     });
+
+    /* Bottom-right outcome badge, keyed on the current γ index (0..10):
+         capsule — γ≤0.2 can't open the lid (fail); γ≥0.3 opens (success).
+         fruit   — γ≤0.4 recovers from the missed grasp (success);
+                   γ≥0.5 over-steers and fails to recover (fail). */
+    var ICON_OK  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg>';
+    var ICON_BAD = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+    var OUTCOMES = {
+      capsule: [ { max: 2,  cls: 'bad', txt: "Can't open the lid" },
+                 { max: 10, cls: 'ok',  txt: 'Successfully open' } ],
+      fruit:   [ { max: 4,  cls: 'ok',  txt: 'Recovers from missed grasp' },
+                 { max: 10, cls: 'bad', txt: 'Fails to recover' } ]
+    };
+    function updateOutcome(s, idx) {
+      if (!s.out) return;
+      var rules = OUTCOMES[s.dir] || [], o = null;
+      for (var i = 0; i < rules.length; i++) { if (idx <= rules[i].max) { o = rules[i]; break; } }
+      if (!o) return;
+      s.out.className = 'vidout ' + o.cls;
+      s.out.innerHTML = (o.cls === 'ok' ? ICON_OK : ICON_BAD) + '<span>' + o.txt + '</span>';
+    }
+    sets.forEach(function (s) { updateOutcome(s, 0); });
+
     var curIdx = 0;          // default src is <dir>/3_0.0 in the markup
     var idleTimer = null;
     function labelFor(idx) { return (idx === 10) ? '1.0' : ('0.' + idx); }
@@ -171,7 +208,7 @@
       if (idx === curIdx) return;
       curIdx = idx;
       // Instant: swap both posters and hide the (now-stale) videos.
-      sets.forEach(function (s) { s.poster.src = psrc(s.dir, idx); s.wrap.classList.remove('playing'); });
+      sets.forEach(function (s) { s.poster.src = psrc(s.dir, idx); s.wrap.classList.remove('playing'); updateOutcome(s, idx); });
       // Debounced: auto-play both matching clips once the slider is idle 1 s.
       if (idleTimer) clearTimeout(idleTimer);
       idleTimer = setTimeout(playAll, 1000);
