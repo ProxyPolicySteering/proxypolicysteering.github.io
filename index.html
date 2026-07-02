@@ -1254,13 +1254,22 @@
                 <div class="ppsc-overlay"><span class="ppsc-overlay-text lora" data-ftype="incorrect">Stows before opening</span></div></div>
             </div>
           </div>
-          <!-- Additional-task panels (no baseline comparison row — just the
-               PPS rollout + Success caption). Sourced from the formerly-
-               separate Real-World Tasks / Simulated Tasks grids. -->
+          <!-- Additional-task panels sourced from the formerly-separate
+               Real-World Tasks / Simulated Tasks grids. Utensil Insertion (7)
+               still shows just the PPS rollout + Success caption; the rest
+               carry a baseline comparison row. -->
           <div class="ppsc-panel" data-i="6">
             <div class="ppsc-hero"><span class="ppsc-tag pps">PPS</span>
               <video src="./static/videos/lever.mp4" autoplay muted playsinline preload="metadata" data-speed="2"></video>
               <div class="ppsc-overlay"><span class="ppsc-overlay-text pps">Success</span></div></div>
+            <div class="ppsc-row">
+              <div class="ppsc-item"><span class="ppsc-tag spec">Specialist</span>
+                <video src="./static/videos/compare/lever_specialist.mp4" autoplay muted playsinline preload="metadata" data-speed="2"></video>
+                <div class="ppsc-overlay"><span class="ppsc-overlay-text spec" data-ftype="ood">Overfit to pressing action</span></div></div>
+              <div class="ppsc-item"><span class="ppsc-tag lora">LoRA</span>
+                <video src="./static/videos/compare/lever_lora.mp4" autoplay muted playsinline preload="metadata" data-speed="2"></video>
+                <div class="ppsc-overlay"><span class="ppsc-overlay-text lora" data-ftype="ood">Overfit to pressing action</span></div></div>
+            </div>
           </div>
           <div class="ppsc-panel" data-i="7">
             <div class="ppsc-hero"><span class="ppsc-tag pps">PPS</span>
